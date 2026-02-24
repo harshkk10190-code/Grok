@@ -25,7 +25,7 @@ app.listen(PORT, () => console.log(`🚀 Kira Quantum V31.5 Server listening on 
 // ========================================== 
 // ⚙️ TELEGRAM & API CONFIGURATION 
 // ========================================== 
-const BOT_TOKEN = "7574355493:AAGqrzekT4_3_fWeRlAazJ64l6f491JCP8U"; 
+const BOT_TOKEN = "7574355493:AAGJquhuW38x4pSy63IkyCQmnH5bG3l_xC0"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"]; 
 const API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30"; 
 
@@ -104,7 +104,11 @@ function getAlternationCount(arr) {
 }
 
 function analyzeV31(history, typeLabel, currentLevel) {
-    if (history.length < 6) return { action: last, conf: 72, reason: "GATHERING DATA" }; // safe default
+    const last = history.length > 0 ? history[0] : "SMALL";
+
+    if (history.length < 6) {
+        return { action: last, conf: 72, reason: "GATHERING DATA" };
+    }
 
     const OPPOSITE = (val) => typeLabel === "SIZE" 
         ? (val === "BIG" ? "SMALL" : "BIG")
@@ -112,7 +116,6 @@ function analyzeV31(history, typeLabel, currentLevel) {
 
     const streak = getStreakLength(history);
     const alts = getAlternationCount(history);
-    const last = history[0];
 
     let action = last;
     let reason = "Standard Mirror Logic";
@@ -127,7 +130,6 @@ function analyzeV31(history, typeLabel, currentLevel) {
         conf = 77 + Math.floor(alts * 1.6);
     }
 
-    // Extra safety in recovery
     if (currentLevel >= 3) conf = Math.max(78, Math.min(96, conf));
     else conf = Math.min(96, conf);
 
@@ -140,7 +142,6 @@ function getBestSignal(list, currentLevel) {
     const sizes = list.map(i => getSize(Number(i.number))); 
     let signal = analyzeV31(sizes, "SIZE", currentLevel);
 
-    // Only skip in deep recovery if very weak
     if (currentLevel >= 4 && signal.conf < 78) {
         signal.action = "WAIT";
     }
@@ -165,7 +166,6 @@ async function tick() {
         const latestIssue = list[0].issueNumber; 
         const targetIssue = (BigInt(latestIssue) + 1n).toString(); 
         
-        // Violet handling
         let currentNum = Number(list[0].number);
         if (currentNum === 0 || currentNum === 5) {
             state.violetPause = Math.max(state.violetPause, currentNum === 5 ? 3 : 2);
