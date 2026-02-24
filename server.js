@@ -10,22 +10,22 @@ app.get('/', (req, res) => {
     const winrate = state.totalSignals > 0 ? Math.round((state.wins / state.totalSignals) * 100) : 100;
     res.send(` 
         <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;"> 
-            <h2>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟏 (𝐓𝐇𝐄 𝐌𝐈𝐑𝐑𝐎𝐑 𝟐.𝟎) 𝐎𝐍𝐋𝐈𝐍𝐄</h2> 
-            <p>Advanced Pattern Recognition • Dramatically Reduced Losing Streaks</p> 
+            <h2>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟏.𝟓 (𝐓𝐇𝐄 𝐌𝐈𝐑𝐑𝐎𝐑) 𝐎𝐍𝐋𝐈𝐍𝐄</h2> 
+            <p>High Frequency + Smart Recovery • Fewer Losing Streaks</p> 
             <div style="background:#0a0a1f;padding:15px;border-radius:10px;margin:20px;display:inline-block;">
                 <p><strong>Win Rate:</strong> \( {winrate}% ( \){state.wins}/${state.totalSignals})</p>
-                <p><strong>Current Level:</strong> ${state.currentLevel + 1} | Violet Pause: ${state.violetPause}</p>
+                <p><strong>Level:</strong> ${state.currentLevel + 1} | Violet Pause: ${state.violetPause}</p>
             </div>
-            <p style="color:#aaa; font-size:12px;">Monitoring: WinGo 1-Minute API • V31 Brain Active</p> 
+            <p style="color:#aaa; font-size:12px;">Monitoring: WinGo 1-Minute API • V31.5 Active</p> 
         </body> 
     `); 
 }); 
-app.listen(PORT, () => console.log(`🚀 Kira Quantum V31 Server listening on port ${PORT}`)); 
+app.listen(PORT, () => console.log(`🚀 Kira Quantum V31.5 Server listening on port ${PORT}`)); 
 
 // ========================================== 
 // ⚙️ TELEGRAM & API CONFIGURATION 
 // ========================================== 
-const BOT_TOKEN = "7574355493:AAE20_DhKCiBh2-iyWdPEi8MurW3P4B-Pmk"; 
+const BOT_TOKEN = "7574355493:AAGqrzekT4_3_fWeRlAazJ64l6f491JCP8U"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"]; 
 const API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30"; 
 
@@ -76,11 +76,11 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟏 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>Advanced Mirror 2.0 Activated\nPattern Recognition + Smart Filtering Online</i>`); 
+    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟏.𝟓 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>High-Frequency Mirror Activated\nSmart Recovery Logic Online</i>`); 
 } 
 
 // ========================================== 
-// 🧠 NEW V31 BRAIN — REAL PATTERN ANALYSIS
+// 🧠 V31.5 BRAIN (SMART + HIGH FREQUENCY)
 // ========================================== 
 function getSize(n) { return Number(n) <= 4 ? "SMALL" : "BIG"; } 
 function getColor(n) { return [0,2,4,6,8].includes(Number(n)) ? "RED" : "GREEN"; } 
@@ -97,67 +97,54 @@ function getStreakLength(arr) {
 
 function getAlternationCount(arr) {
     let count = 0;
-    for (let i = 1; i < arr.length; i++) {
+    for (let i = 1; i < Math.min(12, arr.length); i++) {
         if (arr[i] !== arr[i-1]) count++;
     }
     return count;
 }
 
 function analyzeV31(history, typeLabel, currentLevel) {
-    if (history.length < 8) return { action: "WAIT", conf: 0, reason: "GATHERING DATA" };
+    if (history.length < 6) return { action: last, conf: 72, reason: "GATHERING DATA" }; // safe default
 
     const OPPOSITE = (val) => typeLabel === "SIZE" 
         ? (val === "BIG" ? "SMALL" : "BIG")
         : (val === "RED" ? "GREEN" : "RED");
 
     const streak = getStreakLength(history);
-    const alts = getAlternationCount(history.slice(0, 12));
+    const alts = getAlternationCount(history);
     const last = history[0];
 
-    let action, reason, conf = 68;
+    let action = last;
+    let reason = "Standard Mirror Logic";
+    let conf = 72 + (streak * 4);
 
-    const isStrongStreak = streak >= 4 || (streak >= 3 && currentLevel < 2);
-    const isStrongChop = alts >= 7 || currentLevel >= 3;
-
-    if (isStrongStreak && currentLevel < 3) {
-        action = last;
-        reason = `Strong ${streak}x ${typeLabel} Streak Detected`;
-        conf += streak * 7;
-    } 
-    else if (isStrongChop || currentLevel >= 2) {
+    if (streak >= 4) {
+        reason = `Strong ${streak}x Streak - Riding Momentum`;
+        conf = 89 + Math.min(streak * 2, 8);
+    } else if (alts >= 6 || currentLevel >= 2) {
         action = OPPOSITE(last);
-        reason = `High Alternation Chop Mode (Recovery)`;
-        conf += Math.floor(alts * 1.8);
-    } 
-    else {
-        action = last; // neutral default
-        reason = `Mild Momentum • Cautious Entry`;
+        reason = currentLevel >= 2 ? "Recovery: Catching Alternation Chop" : "Alternation Detected";
+        conf = 77 + Math.floor(alts * 1.6);
     }
 
-    // Safety filter after losses
-    if (currentLevel >= 2 && streak < 2 && alts < 5) {
-        conf -= 18; // weaken weak signals in recovery
-    }
-
-    conf = Math.min(97, Math.max(62, conf));
+    // Extra safety in recovery
+    if (currentLevel >= 3) conf = Math.max(78, Math.min(96, conf));
+    else conf = Math.min(96, conf);
 
     return { type: typeLabel, action, conf, reason };
 }
 
 function getBestSignal(list, currentLevel) { 
-    if (!list || list.length < 8) return { action: "WAIT", conf: 0, reason: "GATHERING DATA" }; 
+    if(!list || list.length < 6) return { type: "SIZE", action: "SMALL", conf: 70, reason: "GATHERING DATA" }; 
     
     const sizes = list.map(i => getSize(Number(i.number))); 
-    const colors = list.map(i => getColor(Number(i.number))); 
-    
-    let sizeSignal = analyzeV31(sizes, "SIZE", currentLevel);
-    let colorSignal = analyzeV31(colors, "COLOR", currentLevel);
+    let signal = analyzeV31(sizes, "SIZE", currentLevel);
 
-    // Prefer SIZE but only take it if confidence is decent
-    if (sizeSignal.conf >= 78) return sizeSignal;
-    if (colorSignal.conf > sizeSignal.conf + 5) return colorSignal;
-    
-    return sizeSignal; 
+    // Only skip in deep recovery if very weak
+    if (currentLevel >= 4 && signal.conf < 78) {
+        signal.action = "WAIT";
+    }
+    return signal; 
 } 
 
 // ========================================== 
@@ -179,7 +166,7 @@ async function tick() {
         const targetIssue = (BigInt(latestIssue) + 1n).toString(); 
         
         // Violet handling
-        const currentNum = Number(list[0].number);
+        let currentNum = Number(list[0].number);
         if (currentNum === 0 || currentNum === 5) {
             state.violetPause = Math.max(state.violetPause, currentNum === 5 ? 3 : 2);
         }
@@ -200,14 +187,15 @@ async function tick() {
                 } 
                 state.totalSignals++; 
 
-                const accuracy = state.totalSignals > 0 ? Math.round((state.wins / state.totalSignals) * 100) : 100; 
-
-                let resMsg = isWin ? `✅ <b>WIN - TARGET ELIMINATED</b> ✅\n` : `❌ <b>MISS - LEVEL UP</b> ❌\n`; 
+                let currentAccuracy = Math.round((state.wins / state.totalSignals) * 100); 
+                
+                let resMsg = isWin ? `✅ <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐄𝐋𝐈𝐌𝐈𝐍𝐀𝐓𝐄𝐃</b> ✅\n` : `❌ <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> ❌\n`; 
                 resMsg += `━━━━━━━━━━━━━━━━━━\n`; 
-                resMsg += `🎯 Period: <code>${state.activePrediction.period.slice(-4)}</code>\n`; 
-                resMsg += `🎲 Result: <b>\( {actualNum} ( \){actualResult})</b>\n`; 
-                resMsg += `📊 Accuracy: <b>${accuracy}%</b>\n`;
-                resMsg += isWin ? `💰 PROFIT SECURED!\n` : `🛡️ Escalating to L${state.currentLevel + 1}\n`;
+                resMsg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝  : <code>${state.activePrediction.period.slice(-4)}</code>\n`; 
+                resMsg += `🎲 𝐑𝐞𝐬𝐮𝐥𝐭  : <b>\( {actualNum} ( \){actualResult})</b>\n`; 
+                resMsg += `━━━━━━━━━━━━━━━━━━\n`; 
+                resMsg += isWin ? `💰 𝐒𝐭𝐚𝐭𝐮𝐬   : <b>PROFIT SECURED!</b>\n` : `🛡️ 𝐒𝐭𝐚𝐭𝐮𝐬   : <b>ESCALATING (L${state.currentLevel + 1})</b>\n`; 
+                resMsg += `🎯 𝐒𝐞𝐪𝐮𝐞𝐧𝐜𝐞 𝐒𝐮𝐜𝐜𝐞𝐬𝐬: <b>${currentAccuracy}%</b>\n`; 
                 
                 await sendTelegram(resMsg); 
             } 
@@ -215,12 +203,17 @@ async function tick() {
             saveState(); 
         } 
         
-        // Generate new signal
+        // Generate signal
         if(state.lastProcessedIssue !== latestIssue && !state.activePrediction) { 
             state.lastProcessedIssue = latestIssue; 
 
             if (state.violetPause > 0) {
-                await sendTelegram(`📡 <b>KIRA RADAR</b> 📡\n━━━━━━━━━━━━━━━━━━\n🎯 Period: <code>\( {targetIssue.slice(-4)}</code>\n⚠️ WAIT - Violet Trap Clear ( \){state.violetPause} left)`);
+                let msg = `📡 <b>𝐊𝐈𝐑𝐀 𝐑𝐀𝐃𝐀𝐑 𝐒𝐂𝐀𝐍</b> 📡\n`; 
+                msg += `━━━━━━━━━━━━━━━━━━\n`; 
+                msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`; 
+                msg += `⚠️ <b>𝐀𝐜𝐭𝐢𝐨𝐧:</b> WAIT\n`; 
+                msg += `📉 <b>𝐑𝐞𝐚𝐬𝐨𝐧:</b> <i>Casino Trap Detected. Pausing to clear board. (${state.violetPause} left)</i>`;
+                await sendTelegram(msg); 
                 state.violetPause--;
                 saveState();
                 return;
@@ -228,32 +221,30 @@ async function tick() {
 
             const signal = getBestSignal(list, state.currentLevel); 
             
-            if (signal.action !== "WAIT" && signal.conf >= 75) { 
-                const betAmount = FUND_LEVELS[state.currentLevel]; 
-                const threat = state.currentLevel >= 4 ? "🔴 DEEP RECOVERY" 
-                              : state.currentLevel >= 2 ? "🟡 RECOVERY MODE" 
-                              : "🟢 STANDARD";
+            if(signal && signal.action !== "WAIT") { 
+                let signalEmoji = "📏"; 
+                let betAmount = FUND_LEVELS[state.currentLevel]; 
 
-                const bar = signal.conf >= 88 ? "🟩🟩🟩🟩🟩" : "🟩🟩🟩🟩⬜";
+                let threatLevel = "🟢 𝐒𝐓𝐀𝐍𝐃𝐀𝐑𝐃 𝐄𝐍𝐓𝐑𝐘";
+                if (state.currentLevel >= 2) threatLevel = "🟡 𝐀𝐃𝐀𝐏𝐓𝐈𝐕𝐄 𝐑𝐄𝐂𝐎𝐕𝐄𝐑𝐘";
+                if (state.currentLevel >= 4) threatLevel = "🔴 𝐃𝐄𝐄𝐏 𝐑𝐄𝐂𝐎𝐕𝐄𝐑𝐘";
 
-                let msg = `⚡️ <b>KIRA QUANTUM V31</b> ⚡️\n━━━━━━━━━━━━━━━━━━\n`;
-                msg += `🎯 Period: <code>${targetIssue.slice(-4)}</code>\n`;
-                msg += `📏 Signal: <b>${signal.type} → ${signal.action}</b>\n`;
-                msg += `📊 Confidence: \( {bar} <b> \){signal.conf}%</b>\n`;
-                msg += `━━━━━━━━━━━━━━━━━━\n`;
-                msg += `${threat}\n`;
-                msg += `💰 Investment: <b>Rs. \( {betAmount}</b> (L \){state.currentLevel + 1})\n`;
-                msg += `<i>${signal.reason}</i>`;
-
+                let bar = "🟩🟩🟩🟩🟩";
+                if (signal.conf < 85) bar = "🟩🟩🟩🟩⬜";
+                
+                let msg = `⚡️ 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟏.𝟓 ⚡️\n`; 
+                msg += `━━━━━━━━━━━━━━━━━━\n`; 
+                msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`; 
+                msg += `${signalEmoji} <b>𝐒𝐢𝐠𝐧𝐚𝐥 𝐓𝐲𝐩𝐞:</b> ${signal.type}\n`; 
+                msg += `🔮 <b>𝐏𝐫𝐞𝐝𝐢𝐜𝐭𝐢𝐨𝐧: ${signal.action}</b>\n`; 
+                msg += `📊 𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞: \( {bar} <b> \){signal.conf}%</b>\n`; 
+                msg += `━━━━━━━━━━━━━━━━━━\n`; 
+                msg += `⚠️ <b>${threatLevel}</b>\n`; 
+                msg += `💰 <b>𝐈𝐧𝐯𝐞𝐬𝐭𝐦𝐞𝐧𝐭 (𝐋${state.currentLevel + 1}): Rs. ${betAmount}</b>\n`; 
+                msg += `🧠 <i>${signal.reason}</i>`; 
+                
                 await sendTelegram(msg); 
-
-                state.activePrediction = { 
-                    period: targetIssue, 
-                    pred: signal.action, 
-                    type: signal.type, 
-                    conf: signal.conf, 
-                    timestamp: Date.now() 
-                }; 
+                state.activePrediction = { period: targetIssue, pred: signal.action, type: signal.type, conf: signal.conf, timestamp: Date.now() }; 
                 saveState(); 
             }
         } 
