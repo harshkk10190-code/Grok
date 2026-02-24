@@ -13,8 +13,8 @@ app.get('/', (req, res) => {
             <h2>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟏.𝟓 (𝐓𝐇𝐄 𝐌𝐈𝐑𝐑𝐎𝐑) 𝐎𝐍𝐋𝐈𝐍𝐄</h2> 
             <p>High Frequency + Smart Recovery • Fewer Losing Streaks</p> 
             <div style="background:#0a0a1f;padding:15px;border-radius:10px;margin:20px;display:inline-block;">
-                <p><strong>Win Rate:</strong> \( {winrate}% ( \){state.wins}/${state.totalSignals})</p>
-                <p><strong>Level:</strong> ${state.currentLevel + 1} | Violet Pause: ${state.violetPause}</p>
+                <p><strong>Win Rate:</strong> ` + winrate + `% (` + state.wins + `/` + state.totalSignals + `)</p>
+                <p><strong>Level:</strong> ` + (state.currentLevel + 1) + ` | Violet Pause: ` + state.violetPause + `</p>
             </div>
             <p style="color:#aaa; font-size:12px;">Monitoring: WinGo 1-Minute API • V31.5 Active</p> 
         </body> 
@@ -25,7 +25,7 @@ app.listen(PORT, () => console.log(`🚀 Kira Quantum V31.5 Server listening on 
 // ========================================== 
 // ⚙️ TELEGRAM & API CONFIGURATION 
 // ========================================== 
-const BOT_TOKEN = "7574355493:AAGJquhuW38x4pSy63IkyCQmnH5bG3l_xC0"; 
+const BOT_TOKEN = "7574355493:AAGB8ioLbm5IX5NTmkueX1VMCzUzoCjEqQ8"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"]; 
 const API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30"; 
 
@@ -122,7 +122,7 @@ function analyzeV31(history, typeLabel, currentLevel) {
     let conf = 72 + (streak * 4);
 
     if (streak >= 4) {
-        reason = `Strong ${streak}x Streak - Riding Momentum`;
+        reason = "Strong " + streak + "x Streak - Riding Momentum";
         conf = 89 + Math.min(streak * 2, 8);
     } else if (alts >= 6 || currentLevel >= 2) {
         action = OPPOSITE(last);
@@ -191,11 +191,11 @@ async function tick() {
                 
                 let resMsg = isWin ? `✅ <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐄𝐋𝐈𝐌𝐈𝐍𝐀𝐓𝐄𝐃</b> ✅\n` : `❌ <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> ❌\n`; 
                 resMsg += `━━━━━━━━━━━━━━━━━━\n`; 
-                resMsg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝  : <code>${state.activePrediction.period.slice(-4)}</code>\n`; 
-                resMsg += `🎲 𝐑𝐞𝐬𝐮𝐥𝐭  : <b>\( {actualNum} ( \){actualResult})</b>\n`; 
+                resMsg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝  : <code>` + state.activePrediction.period.slice(-4) + `</code>\n`; 
+                resMsg += `🎲 𝐑𝐞𝐬𝐮𝐥𝐭  : <b>` + actualNum + ` (` + actualResult + `)</b>\n`; 
                 resMsg += `━━━━━━━━━━━━━━━━━━\n`; 
-                resMsg += isWin ? `💰 𝐒𝐭𝐚𝐭𝐮𝐬   : <b>PROFIT SECURED!</b>\n` : `🛡️ 𝐒𝐭𝐚𝐭𝐮𝐬   : <b>ESCALATING (L${state.currentLevel + 1})</b>\n`; 
-                resMsg += `🎯 𝐒𝐞𝐪𝐮𝐞𝐧𝐜𝐞 𝐒𝐮𝐜𝐜𝐞𝐬𝐬: <b>${currentAccuracy}%</b>\n`; 
+                resMsg += isWin ? `💰 𝐒𝐭𝐚𝐭𝐮𝐬   : <b>PROFIT SECURED!</b>\n` : `🛡️ 𝐒𝐭𝐚𝐭𝐮𝐬   : <b>ESCALATING (L` + (state.currentLevel + 1) + `)</b>\n`; 
+                resMsg += `🎯 𝐒𝐞𝐪𝐮𝐞𝐧𝐜𝐞 𝐒𝐮𝐜𝐜𝐞𝐬𝐬: <b>` + currentAccuracy + `%</b>\n`; 
                 
                 await sendTelegram(resMsg); 
             } 
@@ -210,9 +210,9 @@ async function tick() {
             if (state.violetPause > 0) {
                 let msg = `📡 <b>𝐊𝐈𝐑𝐀 𝐑𝐀𝐃𝐀𝐑 𝐒𝐂𝐀𝐍</b> 📡\n`; 
                 msg += `━━━━━━━━━━━━━━━━━━\n`; 
-                msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`; 
+                msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>` + targetIssue.slice(-4) + `</code>\n`; 
                 msg += `⚠️ <b>𝐀𝐜𝐭𝐢𝐨𝐧:</b> WAIT\n`; 
-                msg += `📉 <b>𝐑𝐞𝐚𝐬𝐨𝐧:</b> <i>Casino Trap Detected. Pausing to clear board. (${state.violetPause} left)</i>`;
+                msg += `📉 <b>𝐑𝐞𝐚𝐬𝐨𝐧:</b> <i>Casino Trap Detected. Pausing to clear board. (` + state.violetPause + ` left)</i>`;
                 await sendTelegram(msg); 
                 state.violetPause--;
                 saveState();
@@ -234,14 +234,14 @@ async function tick() {
                 
                 let msg = `⚡️ 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟏.𝟓 ⚡️\n`; 
                 msg += `━━━━━━━━━━━━━━━━━━\n`; 
-                msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`; 
-                msg += `${signalEmoji} <b>𝐒𝐢𝐠𝐧𝐚𝐥 𝐓𝐲𝐩𝐞:</b> ${signal.type}\n`; 
-                msg += `🔮 <b>𝐏𝐫𝐞𝐝𝐢𝐜𝐭𝐢𝐨𝐧: ${signal.action}</b>\n`; 
-                msg += `📊 𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞: \( {bar} <b> \){signal.conf}%</b>\n`; 
+                msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>` + targetIssue.slice(-4) + `</code>\n`; 
+                msg += signalEmoji + ` <b>𝐒𝐢𝐠𝐧𝐚𝐥 𝐓𝐲𝐩𝐞:</b> ` + signal.type + `\n`; 
+                msg += `🔮 <b>𝐏𝐫𝐞𝐝𝐢𝐜𝐭𝐢𝐨𝐧: ` + signal.action + `</b>\n`; 
+                msg += `📊 𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞: ` + bar + ` <b>` + signal.conf + `%</b>\n`; 
                 msg += `━━━━━━━━━━━━━━━━━━\n`; 
-                msg += `⚠️ <b>${threatLevel}</b>\n`; 
-                msg += `💰 <b>𝐈𝐧𝐯𝐞𝐬𝐭𝐦𝐞𝐧𝐭 (𝐋${state.currentLevel + 1}): Rs. ${betAmount}</b>\n`; 
-                msg += `🧠 <i>${signal.reason}</i>`; 
+                msg += `⚠️ <b>` + threatLevel + `</b>\n`; 
+                msg += `💰 <b>𝐈𝐧𝐯𝐞𝐬𝐭𝐦𝐞𝐧𝐭 (𝐋` + (state.currentLevel + 1) + `): Rs. ` + betAmount + `</b>\n`; 
+                msg += `🧠 <i>` + signal.reason + `</i>`; 
                 
                 await sendTelegram(msg); 
                 state.activePrediction = { period: targetIssue, pred: signal.action, type: signal.type, conf: signal.conf, timestamp: Date.now() }; 
