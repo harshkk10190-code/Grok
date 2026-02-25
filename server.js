@@ -8,33 +8,27 @@ const PORT = process.env.PORT || 3000;
 // ==========================================
 app.get('/', (req, res) => { 
     const winrate = state.totalSignals > 0 ? Math.round((state.wins / state.totalSignals) * 100) : 100;
-    const status = state.safetyPause > 0 ? "🛡️ SAFETY PAUSED" : (state.activePrediction ? "🔥 BET ACTIVE" : "⏳ SCANNING LIVE");
+    const status = state.safetyPause > 0 ? "🛡️ SAFETY PAUSED" : (state.activePrediction ? "🔥 BET ACTIVE" : "⏳ LIVE SCANNING");
     
     res.send(`
-        <html><head><title>KIRA V33.3 ELITE</title><meta http-equiv="refresh" content="8">
-        <style>body{background:#0a001f;color:#00ff9d;font-family:'Courier New',monospace;text-align:center;padding:40px;}
-        h1{text-shadow:0 0 30px #00ff9d;font-size:28px;} .box{background:#120032;border:3px solid #00ff9d;border-radius:20px;padding:30px;max-width:620px;margin:30px auto;box-shadow:0 0 40px #00ff9d33;}
-        .stat{font-size:19px;margin:15px 0;} .live{color:#39ff14;animation:pulse 1.5s infinite;}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}</style></head>
-        <body>
-            <h1>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟑.𝟑 𝐄𝐋𝐈𝐓𝐄 🟢</h1>
-            <p class="live">● LIVE • HYBRID SIZE+COLOR • ZERO RISK</p>
-            <div class="box">
-                <div class="stat">Win Rate: <b>\( {winrate}%</b> ( \){state.wins}/${state.totalSignals})</div>
-                <div class="stat">Level: <b>L${state.currentLevel + 1}</b> • Max Rs.100</div>
-                <div class="stat">Safety Pause: <b>${state.safetyPause}</b></div>
-                <div class="stat">Status: <span style="color:#39ff14">${status}</span></div>
+        <body style="background:#0a001f; color:#00ff9d; font-family:monospace; text-align:center; padding:40px;">
+            <h1>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟏 𝐄𝐋𝐈𝐓𝐄 𝐇𝐘𝐁𝐑𝐈𝐃 🟢</h1>
+            <p>● LIVE • HYBRID SIZE+COLOR • MAX SAFETY</p>
+            <div style="background:#120032; border:3px solid #00ff9d; border-radius:20px; padding:30px; max-width:580px; margin:30px auto; box-shadow:0 0 40px #00ff9d33;">
+                <p><strong>Win Rate:</strong> \( {winrate}% ( \){state.wins}/${state.totalSignals})</p>
+                <p><strong>Level:</strong> L${state.currentLevel + 1} • Max Rs.100</p>
+                <p><strong>Status:</strong> <span style="color:#39ff14">${status}</span></p>
             </div>
-            <p style="color:#555;font-size:13px;">Auto-refresh every 8s • ${new Date().toLocaleTimeString()}</p>
-        </body></html>
+            <p style="color:#555; font-size:13px;">Auto-refresh every 8s • ${new Date().toLocaleTimeString()}</p>
+        </body>
     `); 
 }); 
-app.listen(PORT, () => console.log(`🚀 Kira Quantum V33.3 Elite running on port ${PORT}`)); 
+app.listen(PORT, () => console.log(`🚀 Kira Quantum V34.1 Elite Hybrid on port ${PORT}`)); 
 
 // ========================================== 
 // ⚙️ CONFIG 
 // ========================================== 
-const BOT_TOKEN = "7574355493:AAEFVoqMqFBgnLD52r9JYrm1sEuJ2nQObR0"; 
+const BOT_TOKEN = "7574355493:AAHYysug6fqbTwvbL03I1OfaOAxZkcXAZSU"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"]; 
 const API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30"; 
 
@@ -48,9 +42,15 @@ const HEADERS = {
 }; 
 
 // ========================================== 
-// 🧠 STATE + AUTO RESET ON BOOT
+// 🧠 CLEAN STATE (HARD RESET ON EVERY START)
 // ========================================== 
 const STATE_FILE = './kira_state.json'; 
+
+// FORCE CLEAN START - DELETE OLD STATE FILE
+if (fs.existsSync(STATE_FILE)) {
+    try { fs.unlinkSync(STATE_FILE); console.log("🧹 Old state deleted - fresh start"); } catch(e) {}
+}
+
 let state = { 
     lastProcessedIssue: null, 
     activePrediction: null, 
@@ -63,24 +63,6 @@ let state = {
     safetyPause: 0,
     lastPauseSent: null
 }; 
-
-function loadState() { 
-    if (fs.existsSync(STATE_FILE)) { 
-        try { state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); } 
-        catch(e) { console.log("Memory reset."); } 
-    } 
-} 
-function saveState() { fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2)); } 
-
-loadState();
-
-// AUTO RESET PAUSES ON EVERY RESTART (no more stuck)
-state.violetPause = 0;
-state.safetyPause = 0;
-state.consecutiveLosses = 0;
-state.currentLevel = 0;
-state.lastPauseSent = null;
-saveState();
 
 async function sendTelegram(text) { 
     for (let chat_id of TARGET_CHATS) { 
@@ -96,13 +78,13 @@ async function sendTelegram(text) {
 
 if (!state.isStarted) { 
     state.isStarted = true; 
-    saveState(); 
-    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟑.𝟑 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>My Original Premium Hybrid Activated\nSure-Shot Logic • Max Protection</i>`); 
+    fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2)); 
+    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟏 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>My Original Premium Hybrid Activated\nSure-Shot Logic • Max Protection</i>`); 
     sendTelegram(`🔄 <b>LIVE SCANNING STARTED</b> 🔄\n━━━━━━━━━━━━━━━━━━\nKira is now watching every new period.\nFirst signal coming soon...`); 
 } 
 
 // ========================================== 
-// 🧠 HYBRID BRAIN (MY ORIGINAL)
+// 🧠 MY ORIGINAL HYBRID BRAIN
 // ========================================== 
 function getSize(n) { return Number(n) <= 4 ? "SMALL" : "BIG"; } 
 function getColor(n) { return [0,2,4,6,8].includes(Number(n)) ? "RED" : "GREEN"; } 
@@ -121,7 +103,7 @@ function getAlts(arr) {
 }
 
 function getHybridSignal(list, level) {
-    if (!list || list.length < 12) return {type:"NONE", action:"WAIT", conf:0, reason:"GATHERING"};
+    if (!list || list.length < 8) return {type:"SIZE", action:"SMALL", conf:75, reason:"Scanning"};
 
     const sizes = list.map(i => getSize(Number(i.number)));
     const colors = list.map(i => getColor(Number(i.number)));
@@ -129,7 +111,7 @@ function getHybridSignal(list, level) {
     const s = analyze(sizes, "SIZE", level);
     const c = analyze(colors, "COLOR", level);
 
-    return s.conf > c.conf ? s : c;
+    return s.conf >= c.conf ? s : c;
 }
 
 function analyze(hist, type, level) {
@@ -139,21 +121,21 @@ function analyze(hist, type, level) {
 
     let action = last;
     let reason = "Strong Hybrid Pattern";
-    let conf = 78 + streak * 3;
+    let conf = 80 + streak * 3;
 
-    if (streak >= 5) { reason = `POWER ${streak}x ${type} STREAK`; conf = 96; }
-    else if (alts >= 9 || level >= 1) {
+    if (streak >= 4) { reason = `POWER ${streak}x ${type} STREAK`; conf = 95; }
+    else if (alts >= 8 || level >= 1) {
         action = type === "SIZE" ? (last === "BIG" ? "SMALL" : "BIG") : (last === "RED" ? "GREEN" : "RED");
         reason = level >= 1 ? "Elite Recovery Mode" : "High Alternation";
-        conf = 87 + alts * 1.1;
+        conf = 88 + alts * 1.1;
     }
 
-    if (level >= 1) conf = Math.max(93, Math.min(97, conf));
+    if (level >= 1) conf = Math.max(92, Math.min(97, conf));
     return {type, action, conf: Math.floor(conf), reason};
 }
 
 // ========================================== 
-// ⚙️ MAIN LOOP 
+// ⚙️ MAIN LOOP (CLEAN - NO SPAM)
 // ========================================== 
 let isProcessing = false; 
 
@@ -170,16 +152,23 @@ async function tick() {
         const latestIssue = list[0].issueNumber; 
         const targetIssue = (BigInt(latestIssue) + 1n).toString(); 
         
+        // Violet detection (only once per period)
         let currentNum = Number(list[0].number);
-        if (currentNum === 0 || currentNum === 5) state.violetPause = Math.max(state.violetPause, currentNum === 5 ? 4 : 3);
+        if ((currentNum === 0 || currentNum === 5) && state.lastPauseSent !== latestIssue) {
+            state.violetPause = currentNum === 5 ? 3 : 2;
+            state.lastPauseSent = latestIssue;
+            let msg = `📡 <b>KIRA RADAR SCAN</b> 📡\n━━━━━━━━━━━━━━━━━━\n🎯 Period: <code>\( {targetIssue.slice(-4)}</code>\n⚠️ <b>Action:</b> WAIT\n📉 <b>Reason:</b> <i>Violet Trap Detected. Protecting funds ( \){state.violetPause} left)</i>`;
+            await sendTelegram(msg);
+            fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+        }
 
-        // RESULT CHECK
+        // Check result
         if(state.activePrediction && BigInt(latestIssue) >= BigInt(state.activePrediction.period)) { 
             const resultItem = list.find(i => i.issueNumber === state.activePrediction.period); 
             if(resultItem) { 
                 let actualNum = Number(resultItem.number); 
                 let actualResult = state.activePrediction.type === "SIZE" ? getSize(actualNum) : getColor(actualNum); 
-                let isWin = actualResult === state.activePrediction.pred; 
+                let isWin = (actualResult === state.activePrediction.pred); 
                 
                 if(isWin) { 
                     state.wins++; 
@@ -206,40 +195,33 @@ async function tick() {
                     state.safetyPause = 15;
                     state.currentLevel = 0;
                     state.consecutiveLosses = 0;
-                    await sendTelegram(`🛡️ <b>ELITE SAFETY ACTIVATED</b> 🛡️\n━━━━━━━━━━━━━━━━━━\nL3 failed.\nSkipping 15 periods & resetting to L1.\nFunds 100% protected.`);
+                    await sendTelegram(`🛡️ <b>ELITE SAFETY ACTIVATED</b> 🛡️\nL3 failed. Skipping 15 periods & resetting to L1. Funds protected.`);
                 }
             } 
             state.activePrediction = null; 
-            saveState(); 
+            fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2)); 
         } 
         
-        // NEW SIGNAL
+        // New signal (clean - no spam)
         if(state.lastProcessedIssue !== latestIssue && !state.activePrediction) { 
             state.lastProcessedIssue = latestIssue; 
 
             if (state.violetPause > 0 || state.safetyPause > 0) {
-                if (state.lastPauseSent !== latestIssue) {
-                    let type = state.violetPause > 0 ? "Violet Trap" : "Elite Safety";
-                    let left = state.violetPause > 0 ? state.violetPause : state.safetyPause;
-                    let msg = `📡 <b>KIRA RADAR SCAN</b> 📡\n━━━━━━━━━━━━━━━━━━\n🎯 Period: <code>\( {targetIssue.slice(-4)}</code>\n⚠️ <b>Action:</b> WAIT\n📉 <b>Reason:</b> <i> \){type} Detected. Protecting funds (${left} left)</i>`;
-                    await sendTelegram(msg);
-                    state.lastPauseSent = latestIssue;
-                }
                 if (state.violetPause > 0) state.violetPause--;
                 if (state.safetyPause > 0) state.safetyPause--;
-                saveState();
+                fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
                 return;
             }
 
             const signal = getHybridSignal(list, state.currentLevel); 
             
-            if(signal && signal.action !== "WAIT" && signal.conf >= (state.currentLevel >= 1 ? 93 : 88)) { 
+            if(signal && signal.action !== "WAIT" && signal.conf >= (state.currentLevel >= 1 ? 92 : 87)) { 
                 let bet = FUND_LEVELS[state.currentLevel];
                 let threat = state.currentLevel === 0 ? "🟢 STANDARD ENTRY" : (state.currentLevel === 1 ? "🟡 RECOVERY MODE" : "🔴 DEEP RECOVERY");
                 let bar = signal.conf >= 93 ? "🟩🟩🟩🟩🟩" : "🟩🟩🟩🟩⬜";
                 let emoji = signal.type === "COLOR" ? "🎨" : "📏";
 
-                let msg = `⚡️ <b>KIRA QUANTUM V33.3 ELITE</b> ⚡️\n━━━━━━━━━━━━━━━━━━\n`;
+                let msg = `⚡️ <b>KIRA QUANTUM V34.1 ELITE</b> ⚡️\n━━━━━━━━━━━━━━━━━━\n`;
                 msg += `🎯 Period: <code>${targetIssue.slice(-4)}</code>\n`;
                 msg += `${emoji} <b>Hybrid Signal:</b> ${signal.type}\n`;
                 msg += `🔮 <b>Prediction:</b> ${signal.action}\n`;
@@ -251,7 +233,7 @@ async function tick() {
                 
                 await sendTelegram(msg); 
                 state.activePrediction = { period: targetIssue, pred: signal.action, type: signal.type, conf: signal.conf, timestamp: Date.now() }; 
-                saveState(); 
+                fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2)); 
             }
         } 
     } catch (e) {
