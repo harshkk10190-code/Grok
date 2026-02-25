@@ -4,31 +4,28 @@ const app = express();
 const PORT = process.env.PORT || 3000; 
 
 // ==========================================
-// 🌐 MY PREMIUM DASHBOARD
+// 🌐 CLEAN WEB MONITOR
 // ==========================================
 app.get('/', (req, res) => { 
     const winrate = state.totalSignals > 0 ? Math.round((state.wins / state.totalSignals) * 100) : 100;
-    const status = state.safetyPause > 0 ? "🛡️ SAFETY PAUSED" : (state.activePrediction ? "🔥 BET ACTIVE" : "⏳ LIVE SCANNING");
-    
-    res.send(`
-        <body style="background:#0a001f; color:#00ff9d; font-family:monospace; text-align:center; padding:40px;">
-            <h1>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟏 𝐄𝐋𝐈𝐓𝐄 𝐇𝐘𝐁𝐑𝐈𝐃 🟢</h1>
-            <p>● LIVE • HYBRID SIZE+COLOR • MAX SAFETY</p>
-            <div style="background:#120032; border:3px solid #00ff9d; border-radius:20px; padding:30px; max-width:580px; margin:30px auto; box-shadow:0 0 40px #00ff9d33;">
-                <p><strong>Win Rate:</strong> \( {winrate}% ( \){state.wins}/${state.totalSignals})</p>
-                <p><strong>Level:</strong> L${state.currentLevel + 1} • Max Rs.100</p>
-                <p><strong>Status:</strong> <span style="color:#39ff14">${status}</span></p>
+    res.send(` 
+        <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;"> 
+            <h2>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟐 𝐒𝐈𝐙𝐄 𝐎𝐍𝐋𝐘 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</h2> 
+            <p>Smart Size-Only Logic • Max Safety • Clean Messages</p> 
+            <div style="background:#0a0a1f;padding:20px;border-radius:15px;margin:20px;display:inline-block;">
+                <p><strong>Win Rate:</strong> ` + winrate + `% (` + state.wins + `/` + state.totalSignals + `)</p>
+                <p><strong>Current Level:</strong> ` + (state.currentLevel + 1) + `</p>
             </div>
-            <p style="color:#555; font-size:13px;">Auto-refresh every 8s • ${new Date().toLocaleTimeString()}</p>
-        </body>
+            <p style="color:#aaa; font-size:12px;">Monitoring: WinGo 1-Minute API</p> 
+        </body> 
     `); 
 }); 
-app.listen(PORT, () => console.log(`🚀 Kira Quantum V34.1 Elite Hybrid on port ${PORT}`)); 
+app.listen(PORT, () => console.log(`🚀 Kira Quantum V34.2 Size-Only Elite running`)); 
 
 // ========================================== 
 // ⚙️ CONFIG 
 // ========================================== 
-const BOT_TOKEN = "7574355493:AAHYysug6fqbTwvbL03I1OfaOAxZkcXAZSU"; 
+const BOT_TOKEN = "7574355493:AAF8-ENjdFIcvnfUTN5jCqKXw-mUoAdlQew"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"]; 
 const API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30"; 
 
@@ -42,14 +39,12 @@ const HEADERS = {
 }; 
 
 // ========================================== 
-// 🧠 CLEAN STATE (HARD RESET ON EVERY START)
+// 🧠 STATE - FRESH START
 // ========================================== 
 const STATE_FILE = './kira_state.json'; 
 
-// FORCE CLEAN START - DELETE OLD STATE FILE
-if (fs.existsSync(STATE_FILE)) {
-    try { fs.unlinkSync(STATE_FILE); console.log("🧹 Old state deleted - fresh start"); } catch(e) {}
-}
+// DELETE OLD STATE FOR CLEAN START
+if (fs.existsSync(STATE_FILE)) fs.unlinkSync(STATE_FILE);
 
 let state = { 
     lastProcessedIssue: null, 
@@ -60,9 +55,10 @@ let state = {
     currentLevel: 0,
     violetPause: 0,
     consecutiveLosses: 0,
-    safetyPause: 0,
-    lastPauseSent: null
+    safetyPause: 0
 }; 
+
+function saveState() { fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2)); } 
 
 async function sendTelegram(text) { 
     for (let chat_id of TARGET_CHATS) { 
@@ -78,64 +74,61 @@ async function sendTelegram(text) {
 
 if (!state.isStarted) { 
     state.isStarted = true; 
-    fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2)); 
-    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟏 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>My Original Premium Hybrid Activated\nSure-Shot Logic • Max Protection</i>`); 
-    sendTelegram(`🔄 <b>LIVE SCANNING STARTED</b> 🔄\n━━━━━━━━━━━━━━━━━━\nKira is now watching every new period.\nFirst signal coming soon...`); 
+    saveState(); 
+    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟐 𝐒𝐈𝐙𝐄 𝐎𝐍𝐋𝐘 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>Clean Size-Only Logic Activated\nSure-Shot + Max Safety</i>`); 
+    sendTelegram(`🔄 <b>LIVE SCANNING STARTED</b> 🔄\nKira is now watching every period.\nFirst signal coming soon...`); 
 } 
 
 // ========================================== 
-// 🧠 MY ORIGINAL HYBRID BRAIN
+// 🧠 CLEAN SIZE-ONLY BRAIN
 // ========================================== 
 function getSize(n) { return Number(n) <= 4 ? "SMALL" : "BIG"; } 
-function getColor(n) { return [0,2,4,6,8].includes(Number(n)) ? "RED" : "GREEN"; } 
 
-function getStreak(arr) {
+function getStreakLength(arr) {
     if (arr.length < 2) return 1;
     let len = 1;
-    for (let i = 1; i < arr.length; i++) if (arr[i] === arr[0]) len++; else break;
+    for (let i = 1; i < arr.length; i++) {
+        if (arr[i] === arr[0]) len++;
+        else break;
+    }
     return len;
 }
 
-function getAlts(arr) {
+function getAlternationCount(arr) {
     let count = 0;
-    for (let i = 1; i < Math.min(20, arr.length); i++) if (arr[i] !== arr[i-1]) count++;
+    for (let i = 1; i < Math.min(15, arr.length); i++) {
+        if (arr[i] !== arr[i-1]) count++;
+    }
     return count;
 }
 
-function getHybridSignal(list, level) {
-    if (!list || list.length < 8) return {type:"SIZE", action:"SMALL", conf:75, reason:"Scanning"};
+function analyzeSize(history, currentLevel) {
+    if (history.length < 8) return { action: "SMALL", conf: 75, reason: "Gathering data" };
 
-    const sizes = list.map(i => getSize(Number(i.number)));
-    const colors = list.map(i => getColor(Number(i.number)));
-
-    const s = analyze(sizes, "SIZE", level);
-    const c = analyze(colors, "COLOR", level);
-
-    return s.conf >= c.conf ? s : c;
-}
-
-function analyze(hist, type, level) {
-    const last = hist[0];
-    const streak = getStreak(hist);
-    const alts = getAlts(hist);
+    const last = history[0];
+    const streak = getStreakLength(history);
+    const alts = getAlternationCount(history);
 
     let action = last;
-    let reason = "Strong Hybrid Pattern";
-    let conf = 80 + streak * 3;
+    let reason = "Standard Mirror Logic";
+    let conf = 80 + (streak * 3);
 
-    if (streak >= 4) { reason = `POWER ${streak}x ${type} STREAK`; conf = 95; }
-    else if (alts >= 8 || level >= 1) {
-        action = type === "SIZE" ? (last === "BIG" ? "SMALL" : "BIG") : (last === "RED" ? "GREEN" : "RED");
-        reason = level >= 1 ? "Elite Recovery Mode" : "High Alternation";
-        conf = 88 + alts * 1.1;
+    if (streak >= 4) {
+        reason = "Strong " + streak + "x Streak - Riding Momentum";
+        conf = 93;
+    } else if (alts >= 8 || currentLevel >= 1) {
+        action = last === "BIG" ? "SMALL" : "BIG";
+        reason = currentLevel >= 1 ? "Safe Recovery: High Alternation" : "Alternation Detected";
+        conf = 86 + Math.floor(alts * 1.2);
     }
 
-    if (level >= 1) conf = Math.max(92, Math.min(97, conf));
-    return {type, action, conf: Math.floor(conf), reason};
+    if (currentLevel >= 1) conf = Math.max(91, Math.min(97, conf));
+
+    return { type: "SIZE", action, conf, reason };
 }
 
 // ========================================== 
-// ⚙️ MAIN LOOP (CLEAN - NO SPAM)
+// ⚙️ MAIN LOOP
 // ========================================== 
 let isProcessing = false; 
 
@@ -152,14 +145,9 @@ async function tick() {
         const latestIssue = list[0].issueNumber; 
         const targetIssue = (BigInt(latestIssue) + 1n).toString(); 
         
-        // Violet detection (only once per period)
         let currentNum = Number(list[0].number);
-        if ((currentNum === 0 || currentNum === 5) && state.lastPauseSent !== latestIssue) {
-            state.violetPause = currentNum === 5 ? 3 : 2;
-            state.lastPauseSent = latestIssue;
-            let msg = `📡 <b>KIRA RADAR SCAN</b> 📡\n━━━━━━━━━━━━━━━━━━\n🎯 Period: <code>\( {targetIssue.slice(-4)}</code>\n⚠️ <b>Action:</b> WAIT\n📉 <b>Reason:</b> <i>Violet Trap Detected. Protecting funds ( \){state.violetPause} left)</i>`;
-            await sendTelegram(msg);
-            fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+        if (currentNum === 0 || currentNum === 5) {
+            state.violetPause = Math.max(state.violetPause, currentNum === 5 ? 3 : 2);
         }
 
         // Check result
@@ -167,7 +155,7 @@ async function tick() {
             const resultItem = list.find(i => i.issueNumber === state.activePrediction.period); 
             if(resultItem) { 
                 let actualNum = Number(resultItem.number); 
-                let actualResult = state.activePrediction.type === "SIZE" ? getSize(actualNum) : getColor(actualNum); 
+                let actualResult = getSize(actualNum); 
                 let isWin = (actualResult === state.activePrediction.pred); 
                 
                 if(isWin) { 
@@ -180,16 +168,17 @@ async function tick() {
                 } 
                 state.totalSignals++; 
 
-                let accuracy = Math.round((state.wins / state.totalSignals) * 100); 
+                let currentAccuracy = Math.round((state.wins / state.totalSignals) * 100); 
                 
-                let resMsg = isWin ? `✅ <b>TARGET ELIMINATED</b> ✅\n` : `❌ <b>TARGET MISSED</b> ❌\n`;
-                resMsg += `━━━━━━━━━━━━━━━━━━\n`;
-                resMsg += `🎯 Period: <code>${state.activePrediction.period.slice(-4)}</code>\n`;
-                resMsg += `🎲 Result: <b>\( {actualNum} ( \){actualResult})</b>\n`;
-                resMsg += `━━━━━━━━━━━━━━━━━━\n`;
-                resMsg += isWin ? `💰 <b>PROFIT SECURED!</b>\n` : `🛡️ <b>ESCALATING TO L${state.currentLevel + 1}</b>\n`;
-                resMsg += `📊 Sequence Success: <b>${accuracy}%</b>`;
-                await sendTelegram(resMsg);
+                let resMsg = isWin ? `✅ <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐄𝐋𝐈𝐌𝐈𝐍𝐀𝐓𝐄𝐃</b> ✅\n` : `❌ <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> ❌\n`; 
+                resMsg += `━━━━━━━━━━━━━━━━━━\n`; 
+                resMsg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝  : <code>` + state.activePrediction.period.slice(-4) + `</code>\n`; 
+                resMsg += `🎲 𝐑𝐞𝐬𝐮𝐥𝐭  : <b>` + actualNum + ` (` + actualResult + `)</b>\n`; 
+                resMsg += `━━━━━━━━━━━━━━━━━━\n`; 
+                resMsg += isWin ? `💰 𝐒𝐭𝐚𝐭𝐮𝐬   : <b>PROFIT SECURED!</b>\n` : `🛡️ 𝐒𝐭𝐚𝐭𝐮𝐬   : <b>ESCALATING (L` + (state.currentLevel + 1) + `)</b>\n`; 
+                resMsg += `🎯 𝐒𝐞𝐪𝐮𝐞𝐧𝐜𝐞 𝐒𝐮𝐜𝐜𝐞𝐬𝐬: <b>` + currentAccuracy + `%</b>\n`; 
+                
+                await sendTelegram(resMsg); 
 
                 if (!isWin && state.currentLevel === 2) {
                     state.safetyPause = 15;
@@ -199,41 +188,46 @@ async function tick() {
                 }
             } 
             state.activePrediction = null; 
-            fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2)); 
+            saveState(); 
         } 
         
-        // New signal (clean - no spam)
+        // New signal
         if(state.lastProcessedIssue !== latestIssue && !state.activePrediction) { 
             state.lastProcessedIssue = latestIssue; 
 
             if (state.violetPause > 0 || state.safetyPause > 0) {
+                let pauseType = state.violetPause > 0 ? "Violet Trap" : "Elite Safety";
+                let left = state.violetPause > 0 ? state.violetPause : state.safetyPause;
+                let msg = `📡 <b>𝐊𝐈𝐑𝐀 𝐑𝐀𝐃𝐀𝐑 𝐒𝐂𝐀𝐍</b> 📡\n━━━━━━━━━━━━━━━━━━\n🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>` + targetIssue.slice(-4) + `</code>\n⚠️ <b>𝐀𝐜𝐭𝐢𝐨𝐧:</b> WAIT\n📉 <b>𝐑𝐞𝐚𝐬𝐨𝐧:</b> <i>` + pauseType + ` Detected. Protecting funds (` + left + ` left)</i>`;
+                await sendTelegram(msg); 
                 if (state.violetPause > 0) state.violetPause--;
                 if (state.safetyPause > 0) state.safetyPause--;
-                fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+                saveState();
                 return;
             }
 
-            const signal = getHybridSignal(list, state.currentLevel); 
+            const sizes = list.map(i => getSize(Number(i.number))); 
+            const signal = analyzeSize(sizes, state.currentLevel); 
             
-            if(signal && signal.action !== "WAIT" && signal.conf >= (state.currentLevel >= 1 ? 92 : 87)) { 
-                let bet = FUND_LEVELS[state.currentLevel];
-                let threat = state.currentLevel === 0 ? "🟢 STANDARD ENTRY" : (state.currentLevel === 1 ? "🟡 RECOVERY MODE" : "🔴 DEEP RECOVERY");
-                let bar = signal.conf >= 93 ? "🟩🟩🟩🟩🟩" : "🟩🟩🟩🟩⬜";
-                let emoji = signal.type === "COLOR" ? "🎨" : "📏";
+            if(signal.action !== "WAIT" && signal.conf >= 88) { 
+                let betAmount = FUND_LEVELS[state.currentLevel]; 
+                let threatLevel = state.currentLevel === 0 ? "🟢 𝐒𝐓𝐀𝐍𝐃𝐀𝐑𝐃 𝐄𝐍𝐓𝐑𝐘" : (state.currentLevel === 1 ? "🟡 𝐑𝐄𝐂𝐎𝐕𝐄𝐑𝐘 𝐌𝐎𝐃𝐄" : "🔴 𝐃𝐄𝐄𝐏 𝐑𝐄𝐂𝐎𝐕𝐄𝐑𝐘");
+                let bar = signal.conf >= 92 ? "🟩🟩🟩🟩🟩" : "🟩🟩🟩🟩⬜";
 
-                let msg = `⚡️ <b>KIRA QUANTUM V34.1 ELITE</b> ⚡️\n━━━━━━━━━━━━━━━━━━\n`;
-                msg += `🎯 Period: <code>${targetIssue.slice(-4)}</code>\n`;
-                msg += `${emoji} <b>Hybrid Signal:</b> ${signal.type}\n`;
-                msg += `🔮 <b>Prediction:</b> ${signal.action}\n`;
-                msg += `📊 Confidence: \( {bar} <b> \){signal.conf}%</b>\n`;
-                msg += `━━━━━━━━━━━━━━━━━━\n`;
-                msg += `⚠️ <b>${threat}</b>\n`;
-                msg += `💰 <b>Investment (L${state.currentLevel+1}): Rs. ${bet}</b>\n`;
-                msg += `🧠 <i>${signal.reason}</i>`;
+                let msg = `⚡️ 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟐 𝐄𝐋𝐈𝐓𝐄 ⚡️\n`; 
+                msg += `━━━━━━━━━━━━━━━━━━\n`; 
+                msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>` + targetIssue.slice(-4) + `</code>\n`; 
+                msg += `📏 <b>𝐒𝐢𝐠𝐧𝐚𝐥 𝐓𝐲𝐩𝐞:</b> ` + signal.type + `\n`; 
+                msg += `🔮 <b>𝐏𝐫𝐞𝐝𝐢𝐜𝐭𝐢𝐨𝐧: ` + signal.action + `</b>\n`; 
+                msg += `📊 𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞: ` + bar + ` <b>` + signal.conf + `%</b>\n`; 
+                msg += `━━━━━━━━━━━━━━━━━━\n`; 
+                msg += `⚠️ <b>` + threatLevel + `</b>\n`; 
+                msg += `💰 <b>𝐈𝐧𝐯𝐞𝐬𝐭𝐦𝐞𝐧𝐭 (𝐋` + (state.currentLevel + 1) + `): Rs. ` + betAmount + `</b>\n`; 
+                msg += `🧠 <i>` + signal.reason + `</i>`; 
                 
                 await sendTelegram(msg); 
                 state.activePrediction = { period: targetIssue, pred: signal.action, type: signal.type, conf: signal.conf, timestamp: Date.now() }; 
-                fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2)); 
+                saveState(); 
             }
         } 
     } catch (e) {
