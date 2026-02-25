@@ -4,28 +4,28 @@ const app = express();
 const PORT = process.env.PORT || 3000; 
 
 // ==========================================
-// 🌐 CLEAN WEB MONITOR
+// 🌐 WEB MONITOR 
 // ==========================================
 app.get('/', (req, res) => { 
     const winrate = state.totalSignals > 0 ? Math.round((state.wins / state.totalSignals) * 100) : 100;
     res.send(` 
         <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;"> 
-            <h2>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟐 𝐒𝐈𝐙𝐄 𝐎𝐍𝐋𝐘 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</h2> 
-            <p>Smart Size-Only Logic • Max Safety • Clean Messages</p> 
+            <h2>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟒 𝐒𝐈𝐙𝐄 𝐎𝐍𝐋𝐘 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</h2> 
+            <p>Smart Size Logic • Clean Messages • Never Stops</p> 
             <div style="background:#0a0a1f;padding:20px;border-radius:15px;margin:20px;display:inline-block;">
                 <p><strong>Win Rate:</strong> ` + winrate + `% (` + state.wins + `/` + state.totalSignals + `)</p>
-                <p><strong>Current Level:</strong> ` + (state.currentLevel + 1) + `</p>
+                <p><strong>Level:</strong> ` + (state.currentLevel + 1) + `</p>
             </div>
             <p style="color:#aaa; font-size:12px;">Monitoring: WinGo 1-Minute API</p> 
         </body> 
     `); 
 }); 
-app.listen(PORT, () => console.log(`🚀 Kira Quantum V34.2 Size-Only Elite running`)); 
+app.listen(PORT, () => console.log(`🚀 Kira Quantum V34.4 Size-Only Elite running`)); 
 
 // ========================================== 
 // ⚙️ CONFIG 
 // ========================================== 
-const BOT_TOKEN = "7574355493:AAF8-ENjdFIcvnfUTN5jCqKXw-mUoAdlQew"; 
+const BOT_TOKEN = "7574355493:AAGDeKaIBU9gN935fn1qqvTvRKuOPerekoU"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"]; 
 const API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30"; 
 
@@ -42,8 +42,6 @@ const HEADERS = {
 // 🧠 STATE - FRESH START
 // ========================================== 
 const STATE_FILE = './kira_state.json'; 
-
-// DELETE OLD STATE FOR CLEAN START
 if (fs.existsSync(STATE_FILE)) fs.unlinkSync(STATE_FILE);
 
 let state = { 
@@ -75,12 +73,12 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟐 𝐒𝐈𝐙𝐄 𝐎𝐍𝐋𝐘 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>Clean Size-Only Logic Activated\nSure-Shot + Max Safety</i>`); 
-    sendTelegram(`🔄 <b>LIVE SCANNING STARTED</b> 🔄\nKira is now watching every period.\nFirst signal coming soon...`); 
+    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟒 𝐒𝐈𝐙𝐄 𝐎𝐍𝐋𝐘 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>Clean Size-Only Logic Activated\nSure-Shot + Never Stops</i>`); 
+    sendTelegram(`🔄 <b>LIVE SCANNING STARTED</b> 🔄\nKira is now watching every new period.\nFirst signal coming soon...`); 
 } 
 
 // ========================================== 
-// 🧠 CLEAN SIZE-ONLY BRAIN
+// 🧠 SIZE-ONLY BRAIN
 // ========================================== 
 function getSize(n) { return Number(n) <= 4 ? "SMALL" : "BIG"; } 
 
@@ -110,7 +108,7 @@ function analyzeSize(history, currentLevel) {
     const alts = getAlternationCount(history);
 
     let action = last;
-    let reason = "Standard Mirror Logic";
+    let reason = "Mirror Logic: Riding Current Momentum";
     let conf = 80 + (streak * 3);
 
     if (streak >= 4) {
@@ -118,7 +116,7 @@ function analyzeSize(history, currentLevel) {
         conf = 93;
     } else if (alts >= 8 || currentLevel >= 1) {
         action = last === "BIG" ? "SMALL" : "BIG";
-        reason = currentLevel >= 1 ? "Safe Recovery: High Alternation" : "Alternation Detected";
+        reason = "Safe Recovery: High Alternation";
         conf = 86 + Math.floor(alts * 1.2);
     }
 
@@ -128,7 +126,7 @@ function analyzeSize(history, currentLevel) {
 }
 
 // ========================================== 
-// ⚙️ MAIN LOOP
+// ⚙️ MAIN LOOP - FIXED TO NEVER STOP
 // ========================================== 
 let isProcessing = false; 
 
@@ -150,7 +148,7 @@ async function tick() {
             state.violetPause = Math.max(state.violetPause, currentNum === 5 ? 3 : 2);
         }
 
-        // Check result
+        // 1. CHECK PREVIOUS RESULT
         if(state.activePrediction && BigInt(latestIssue) >= BigInt(state.activePrediction.period)) { 
             const resultItem = list.find(i => i.issueNumber === state.activePrediction.period); 
             if(resultItem) { 
@@ -191,7 +189,7 @@ async function tick() {
             saveState(); 
         } 
         
-        // New signal
+        // 2. GENERATE NEW SIGNAL FOR EVERY NEW PERIOD (FIXED)
         if(state.lastProcessedIssue !== latestIssue && !state.activePrediction) { 
             state.lastProcessedIssue = latestIssue; 
 
@@ -214,7 +212,7 @@ async function tick() {
                 let threatLevel = state.currentLevel === 0 ? "🟢 𝐒𝐓𝐀𝐍𝐃𝐀𝐑𝐃 𝐄𝐍𝐓𝐑𝐘" : (state.currentLevel === 1 ? "🟡 𝐑𝐄𝐂𝐎𝐕𝐄𝐑𝐘 𝐌𝐎𝐃𝐄" : "🔴 𝐃𝐄𝐄𝐏 𝐑𝐄𝐂𝐎𝐕𝐄𝐑𝐘");
                 let bar = signal.conf >= 92 ? "🟩🟩🟩🟩🟩" : "🟩🟩🟩🟩⬜";
 
-                let msg = `⚡️ 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟐 𝐄𝐋𝐈𝐓𝐄 ⚡️\n`; 
+                let msg = `⚡️ 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟒 𝐄𝐋𝐈𝐓𝐄 ⚡️\n`; 
                 msg += `━━━━━━━━━━━━━━━━━━\n`; 
                 msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>` + targetIssue.slice(-4) + `</code>\n`; 
                 msg += `📏 <b>𝐒𝐢𝐠𝐧𝐚𝐥 𝐓𝐲𝐩𝐞:</b> ` + signal.type + `\n`; 
