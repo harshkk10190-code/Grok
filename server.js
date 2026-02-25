@@ -4,33 +4,54 @@ const app = express();
 const PORT = process.env.PORT || 3000; 
 
 // ==========================================
-// 🌐 WEB MONITOR 
+// 🌐 BEAUTIFUL V33 ELITE DASHBOARD
 // ==========================================
 app.get('/', (req, res) => { 
     const winrate = state.totalSignals > 0 ? Math.round((state.wins / state.totalSignals) * 100) : 100;
-    res.send(` 
-        <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;"> 
-            <h2>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟐 𝐒𝐀𝐅𝐄 𝐌𝐈𝐑𝐑𝐎𝐑 𝐎𝐍𝐋𝐈𝐍𝐄</h2> 
-            <p>Max Level Locked • Auto Safety Pause After 3 Losses</p> 
-            <div style="background:#0a0a1f;padding:15px;border-radius:10px;margin:20px;display:inline-block;">
-                <p><strong>Win Rate:</strong> ` + winrate + `% (` + state.wins + `/` + state.totalSignals + `)</p>
-                <p><strong>Level:</strong> ` + (state.currentLevel + 1) + ` | Consec Losses: ` + state.consecutiveLosses + ` | Safety Pause: ` + state.safetyPause + `</p>
+    const currentLevel = state.currentLevel + 1;
+    const status = state.safetyPause > 0 ? "SAFETY PAUSED" : (state.activePrediction ? "BET ACTIVE" : "WAITING");
+    
+    res.send(`
+        <html>
+        <head>
+            <title>KIRA V33 ELITE</title>
+            <meta http-equiv="refresh" content="8">
+            <style>
+                body { background:#0a0a1f; color:#00ff9d; font-family:'Courier New',monospace; text-align:center; padding:30px; }
+                h1 { color:#00ff9d; text-shadow:0 0 20px #00ff9d; }
+                .box { background:#11112a; border:2px solid #00ff9d; border-radius:15px; padding:25px; max-width:600px; margin:20px auto; box-shadow:0 0 30px rgba(0,255,157,0.3); }
+                .stat { font-size:18px; margin:12px 0; }
+                .live { color:#00ff41; animation: pulse 2s infinite; }
+                @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+            </style>
+        </head>
+        <body>
+            <h1>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟑 𝐄𝐋𝐈𝐓𝐄 𝐇𝐘𝐁𝐑𝐈𝐃 🟢</h1>
+            <p class="live">● LIVE • HYBRID SIZE+COLOR • MAX PROTECTION</p>
+            
+            <div class="box">
+                <div class="stat"><strong>Win Rate:</strong> \( {winrate}% ( \){state.wins}/${state.totalSignals})</div>
+                <div class="stat"><strong>Current Level:</strong> L${currentLevel} • Bet: Rs. ${FUND_LEVELS[state.currentLevel] || 0}</div>
+                <div class="stat"><strong>Consecutive Losses:</strong> ${state.consecutiveLosses} • Safety Pause: ${state.safetyPause}</div>
+                <div class="stat"><strong>Status:</strong> <span style="color:#00ff41">${status}</span></div>
+                ${state.activePrediction ? `<div class="stat">Last Bet: ${state.activePrediction.type} → ${state.activePrediction.pred}</div>` : ''}
             </div>
-            <p style="color:#aaa; font-size:12px;">Monitoring: WinGo 1-Minute API • V32 Safe Active</p> 
-        </body> 
+            
+            <p style="color:#666; font-size:13px;">Auto-refreshes every 8s • ${new Date().toLocaleTimeString()}</p>
+        </body>
+        </html>
     `); 
 }); 
-app.listen(PORT, () => console.log(`🚀 Kira Quantum V32 Safe Mirror listening on port ${PORT}`)); 
+app.listen(PORT, () => console.log(`🚀 Kira Quantum V33 Elite Hybrid listening on port ${PORT}`)); 
 
 // ========================================== 
-// ⚙️ TELEGRAM & API CONFIGURATION 
+// ⚙️ CONFIG 
 // ========================================== 
-const BOT_TOKEN = "7574355493:AAEvmmu-nxfi2nm7yGXezl0Z3XB_37Qwl_4"; 
+const BOT_TOKEN = "7574355493:AAHXuRzRUtfAWjsP3qUO8UATMMArJ6gZLxM"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"]; 
 const API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30"; 
 
-// MAX 4 LEVELS ONLY — SAFE MODE
-const FUND_LEVELS = [33, 66, 100, 133]; 
+const FUND_LEVELS = [33, 66, 100]; // MAX 3 LEVELS ONLY
 
 const HEADERS = { 
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 
@@ -40,7 +61,7 @@ const HEADERS = {
 }; 
 
 // ========================================== 
-// 🧠 MEMORY & STATE 
+// 🧠 STATE 
 // ========================================== 
 const STATE_FILE = './kira_state.json'; 
 let state = { 
@@ -79,11 +100,11 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟐 𝐒𝐀𝐅𝐄 𝐌𝐈𝐑𝐑𝐎𝐑 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>Maximum Protection Activated\nNever above L4 • Auto Safety Pause after 3 losses</i>`); 
+    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟑 𝐄𝐋𝐈𝐓𝐄 𝐇𝐘𝐁𝐑𝐈𝐃 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>Hybrid Size+Color Activated\nUltra-Sure-Shot Logic • Max Protection</i>`); 
 } 
 
 // ========================================== 
-// 🧠 V32 SAFE BRAIN 
+// 🧠 V33 ELITE HYBRID BRAIN
 // ========================================== 
 function getSize(n) { return Number(n) <= 4 ? "SMALL" : "BIG"; } 
 function getColor(n) { return [0,2,4,6,8].includes(Number(n)) ? "RED" : "GREEN"; } 
@@ -100,55 +121,58 @@ function getStreakLength(arr) {
 
 function getAlternationCount(arr) {
     let count = 0;
-    for (let i = 1; i < Math.min(15, arr.length); i++) {
+    for (let i = 1; i < Math.min(20, arr.length); i++) {
         if (arr[i] !== arr[i-1]) count++;
     }
     return count;
 }
 
-function analyzeV32(history, typeLabel, currentLevel) {
-    const last = history.length > 0 ? history[0] : "SMALL";
-    if (history.length < 10) return { action: last, conf: 70, reason: "GATHERING DATA" };
+function getHybridSignal(list, currentLevel) {
+    if (!list || list.length < 12) return { type: "NONE", action: "WAIT", conf: 0, reason: "GATHERING DATA" };
 
-    const OPPOSITE = (val) => typeLabel === "SIZE" ? (val === "BIG" ? "SMALL" : "BIG") : (val === "RED" ? "GREEN" : "RED");
+    const sizes = list.map(i => getSize(Number(i.number)));
+    const colors = list.map(i => getColor(Number(i.number)));
 
+    const sizeSignal = analyzeSingle(sizes, "SIZE", currentLevel);
+    const colorSignal = analyzeSingle(colors, "COLOR", currentLevel);
+
+    // Choose the stronger one
+    if (sizeSignal.conf > colorSignal.conf + 5) return sizeSignal;
+    if (colorSignal.conf > sizeSignal.conf + 5) return colorSignal;
+
+    // If close, pick the one with stronger streak/alternation
+    return sizeSignal.conf >= colorSignal.conf ? sizeSignal : colorSignal;
+}
+
+function analyzeSingle(history, typeLabel, currentLevel) {
+    const last = history[0];
     const streak = getStreakLength(history);
     const alts = getAlternationCount(history);
 
     let action = last;
-    let reason = "Standard Mirror Logic";
-    let conf = 72 + (streak * 4);
+    let reason = "Standard Hybrid Logic";
+    let conf = 75 + (streak * 3);
 
     if (streak >= 5) {
-        reason = "Very Strong " + streak + "x Streak";
-        conf = 92;
-    } else if (alts >= 8 || currentLevel >= 2) {
-        action = OPPOSITE(last);
-        reason = currentLevel >= 2 ? "Safe Recovery: High Alternation" : "Alternation Detected";
-        conf = 80 + Math.floor(alts * 1.2);
+        reason = `Very Strong ${streak}x ${typeLabel} Streak`;
+        conf = 94;
+    } else if (alts >= 9 || currentLevel >= 1) {
+        action = typeLabel === "SIZE" 
+            ? (last === "BIG" ? "SMALL" : "BIG")
+            : (last === "RED" ? "GREEN" : "RED");
+        reason = currentLevel >= 1 ? "Elite Recovery: High Alternation" : "Strong Alternation Detected";
+        conf = 84 + Math.floor(alts * 1.2);
     }
 
-    if (currentLevel >= 2) conf = Math.max(85, Math.min(96, conf)); // stricter in recovery
-    else conf = Math.min(96, conf);
+    // Strict thresholds
+    if (currentLevel >= 1) conf = Math.max(93, Math.min(97, conf));
+    else conf = Math.min(97, conf);
 
     return { type: typeLabel, action, conf, reason };
 }
 
-function getBestSignal(list, currentLevel) { 
-    if(!list || list.length < 10) return { type: "SIZE", action: "WAIT", conf: 0, reason: "GATHERING DATA" }; 
-    
-    const sizes = list.map(i => getSize(Number(i.number))); 
-    let signal = analyzeV32(sizes, "SIZE", currentLevel);
-
-    // Safety filter
-    if (currentLevel >= 2 && signal.conf < 85) signal.action = "WAIT";
-    if (currentLevel >= 3 && signal.conf < 88) signal.action = "WAIT";
-
-    return signal; 
-} 
-
 // ========================================== 
-// ⚙️ SERVER MAIN LOOP 
+// ⚙️ MAIN LOOP 
 // ========================================== 
 let isProcessing = false; 
 
@@ -167,10 +191,10 @@ async function tick() {
         
         let currentNum = Number(list[0].number);
         if (currentNum === 0 || currentNum === 5) {
-            state.violetPause = Math.max(state.violetPause, currentNum === 5 ? 3 : 2);
+            state.violetPause = Math.max(state.violetPause, currentNum === 5 ? 4 : 3);
         }
 
-        // Check previous result
+        // Check result
         if(state.activePrediction && BigInt(latestIssue) >= BigInt(state.activePrediction.period)) { 
             const resultItem = list.find(i => i.issueNumber === state.activePrediction.period); 
             if(resultItem) { 
@@ -185,14 +209,6 @@ async function tick() {
                 } else { 
                     state.currentLevel = Math.min(state.currentLevel + 1, FUND_LEVELS.length - 1); 
                     state.consecutiveLosses++;
-                    
-                    // SAFETY TRIGGER
-                    if (state.consecutiveLosses >= 3) {
-                        state.safetyPause = 8;
-                        state.currentLevel = 0;
-                        state.consecutiveLosses = 0;
-                        await sendTelegram(`🛡️ <b>SAFETY PAUSE ACTIVATED</b> 🛡️\n━━━━━━━━━━━━━━━━━━\n3 consecutive losses detected.\nPausing 8 periods & resetting to L1. Funds protected.`);
-                    }
                 } 
                 state.totalSignals++; 
 
@@ -200,31 +216,40 @@ async function tick() {
                 
                 let resMsg = isWin ? `✅ <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐄𝐋𝐈𝐌𝐈𝐍𝐀𝐓𝐄𝐃</b> ✅\n` : `❌ <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> ❌\n`; 
                 resMsg += `━━━━━━━━━━━━━━━━━━\n`; 
-                resMsg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝  : <code>` + state.activePrediction.period.slice(-4) + `</code>\n`; 
-                resMsg += `🎲 𝐑𝐞𝐬𝐮𝐥𝐭  : <b>` + actualNum + ` (` + actualResult + `)</b>\n`; 
+                resMsg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>` + state.activePrediction.period.slice(-4) + `</code>\n`; 
+                resMsg += `🎲 𝐑𝐞𝐬𝐮𝐥𝐭: <b>` + actualNum + ` (` + actualResult + `)</b>\n`; 
                 resMsg += `━━━━━━━━━━━━━━━━━━\n`; 
-                resMsg += isWin ? `💰 𝐒𝐭𝐚𝐭𝐮𝐬   : <b>PROFIT SECURED!</b>\n` : `🛡️ 𝐒𝐭𝐚𝐭𝐮𝐬   : <b>ESCALATING (L` + (state.currentLevel + 1) + `)</b>\n`; 
-                resMsg += `🎯 𝐒𝐞𝐪𝐮𝐞𝐧𝐜𝐞 𝐒𝐮𝐜𝐜𝐞𝐬𝐬: <b>` + currentAccuracy + `%</b>\n`; 
                 
+                if (isWin) {
+                    resMsg += `💰 𝐒𝐭𝐚𝐭𝐮𝐬: <b>PROFIT SECURED!</b>\n`;
+                } else if (state.currentLevel === 2) { // L3 failed
+                    resMsg += `🛡️ 𝐒𝐭𝐚𝐭𝐮𝐬: <b>L3 FAILED → FULL SAFETY ACTIVATED</b>\n`;
+                } else {
+                    resMsg += `🛡️ 𝐒𝐭𝐚𝐭𝐮𝐬: <b>ESCALATING (L` + (state.currentLevel + 1) + `)</b>\n`;
+                }
+                
+                resMsg += `🎯 𝐒𝐞𝐪𝐮𝐞𝐧𝐜𝐞 𝐒𝐮𝐜𝐜𝐞𝐬𝐬: <b>` + currentAccuracy + `%</b>\n`; 
                 await sendTelegram(resMsg); 
+
+                if (!isWin && state.currentLevel === 2) { // L3 failed
+                    state.safetyPause = 15;
+                    state.currentLevel = 0;
+                    state.consecutiveLosses = 0;
+                    await sendTelegram(`🛡️ <b>ELITE SAFETY PAUSE ACTIVATED</b> 🛡️\n━━━━━━━━━━━━━━━━━━\nL3 failed. Skipping 15 periods & resetting.\nFunds 100% protected.`);
+                }
             } 
             state.activePrediction = null; 
             saveState(); 
         } 
         
-        // Generate signal
+        // New signal
         if(state.lastProcessedIssue !== latestIssue && !state.activePrediction) { 
             state.lastProcessedIssue = latestIssue; 
 
-            // Violet or Safety Pause
             if (state.violetPause > 0 || state.safetyPause > 0) {
-                let pauseType = state.violetPause > 0 ? "Violet Trap" : "Safety Protection";
+                let pauseType = state.violetPause > 0 ? "Violet Trap" : "Elite Safety";
                 let left = state.violetPause > 0 ? state.violetPause : state.safetyPause;
-                let msg = `📡 <b>𝐊𝐈𝐑𝐀 𝐑𝐀𝐃𝐀𝐑 𝐒𝐂𝐀𝐍</b> 📡\n`; 
-                msg += `━━━━━━━━━━━━━━━━━━\n`; 
-                msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>` + targetIssue.slice(-4) + `</code>\n`; 
-                msg += `⚠️ <b>𝐀𝐜𝐭𝐢𝐨𝐧:</b> WAIT\n`; 
-                msg += `📉 <b>𝐑𝐞𝐚𝐬𝐨𝐧:</b> <i>` + pauseType + ` Detected. Pausing to protect funds. (` + left + ` left)</i>`;
+                let msg = `📡 <b>𝐊𝐈𝐑𝐀 𝐑𝐀𝐃𝐀𝐑 𝐒𝐂𝐀𝐍</b> 📡\n━━━━━━━━━━━━━━━━━━\n🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>` + targetIssue.slice(-4) + `</code>\n⚠️ <b>𝐀𝐜𝐭𝐢𝐨𝐧:</b> WAIT\n📉 <b>𝐑𝐞𝐚𝐬𝐨𝐧:</b> <i>` + pauseType + ` Detected. Protecting funds (` + left + ` left)</i>`;
                 await sendTelegram(msg); 
                 if (state.violetPause > 0) state.violetPause--;
                 if (state.safetyPause > 0) state.safetyPause--;
@@ -232,23 +257,18 @@ async function tick() {
                 return;
             }
 
-            const signal = getBestSignal(list, state.currentLevel); 
+            const signal = getHybridSignal(list, state.currentLevel); 
             
-            if(signal && signal.action !== "WAIT" && signal.conf >= 80) { 
-                let signalEmoji = "📏"; 
+            if(signal && signal.action !== "WAIT" && signal.conf >= (state.currentLevel >= 1 ? 93 : 88)) { 
                 let betAmount = FUND_LEVELS[state.currentLevel]; 
-
-                let threatLevel = "🟢 𝐒𝐓𝐀𝐍𝐃𝐀𝐑𝐃 𝐄𝐍𝐓𝐑𝐘";
-                if (state.currentLevel >= 2) threatLevel = "🟡 𝐀𝐃𝐀𝐏𝐓𝐈𝐕𝐄 𝐑𝐄𝐂𝐎𝐕𝐄𝐑𝐘";
-                if (state.currentLevel >= 3) threatLevel = "🔴 𝐃𝐄𝐄𝐏 𝐑𝐄𝐂𝐎𝐕𝐄𝐑𝐘";
+                let threatLevel = state.currentLevel === 0 ? "🟢 𝐒𝐓𝐀𝐍𝐃𝐀𝐑𝐃 𝐄𝐍𝐓𝐑𝐘" : (state.currentLevel === 1 ? "🟡 𝐀𝐃𝐀𝐏𝐓𝐈𝐕𝐄 𝐑𝐄𝐂𝐎𝐕𝐄𝐑𝐘" : "🔴 𝐃𝐄𝐄𝐏 𝐑𝐄𝐂𝐎𝐕𝐄𝐑𝐘");
 
                 let bar = "🟩🟩🟩🟩🟩";
-                if (signal.conf < 88) bar = "🟩🟩🟩🟩⬜";
+                if (signal.conf < 92) bar = "🟩🟩🟩🟩⬜";
                 
-                let msg = `⚡️ 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟐 𝐒𝐀𝐅𝐄 ⚡️\n`; 
-                msg += `━━━━━━━━━━━━━━━━━━\n`; 
-                msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>` + targetIssue.slice(-4) + `</code>\n`; 
-                msg += signalEmoji + ` <b>𝐒𝐢𝐠𝐧𝐚𝐥 𝐓𝐲𝐩𝐞:</b> ` + signal.type + `\n`; 
+                let msg = `⚡️ 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟑 𝐄𝐋𝐈𝐓𝐄 ⚡️\n━━━━━━━━━━━━━━━━━━\n`;
+                msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>` + targetIssue.slice(-4) + `</code>\n`;
+                msg += (signal.type === "COLOR" ? "🎨" : "📏") + ` <b>𝐇𝐲𝐛𝐫𝐢𝐝 𝐒𝐢𝐠𝐧𝐚𝐥:</b> ` + signal.type + `\n`; 
                 msg += `🔮 <b>𝐏𝐫𝐞𝐝𝐢𝐜𝐭𝐢𝐨𝐧: ` + signal.action + `</b>\n`; 
                 msg += `📊 𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞: ` + bar + ` <b>` + signal.conf + `%</b>\n`; 
                 msg += `━━━━━━━━━━━━━━━━━━\n`; 
