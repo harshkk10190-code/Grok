@@ -4,37 +4,37 @@ const app = express();
 const PORT = process.env.PORT || 3000; 
 
 // ==========================================
-// 🌐 MY ORIGINAL PREMIUM WEB DASHBOARD
+// 🌐 MY PREMIUM DASHBOARD
 // ==========================================
 app.get('/', (req, res) => { 
     const winrate = state.totalSignals > 0 ? Math.round((state.wins / state.totalSignals) * 100) : 100;
-    const status = state.safetyPause > 0 ? "🛡️ SAFETY PAUSED" : (state.activePrediction ? "🔥 BET ACTIVE" : "⏳ WAITING");
+    const status = state.safetyPause > 0 ? "🛡️ SAFETY PAUSED" : (state.activePrediction ? "🔥 BET ACTIVE" : "⏳ SCANNING LIVE");
     
     res.send(`
-        <html><head><title>KIRA V33.2 ELITE</title><meta http-equiv="refresh" content="8">
+        <html><head><title>KIRA V33.3 ELITE</title><meta http-equiv="refresh" content="8">
         <style>body{background:#0a001f;color:#00ff9d;font-family:'Courier New',monospace;text-align:center;padding:40px;}
         h1{text-shadow:0 0 30px #00ff9d;font-size:28px;} .box{background:#120032;border:3px solid #00ff9d;border-radius:20px;padding:30px;max-width:620px;margin:30px auto;box-shadow:0 0 40px #00ff9d33;}
         .stat{font-size:19px;margin:15px 0;} .live{color:#39ff14;animation:pulse 1.5s infinite;}
         @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}</style></head>
         <body>
-            <h1>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟑.𝟐 𝐄𝐋𝐈𝐓𝐄 𝐇𝐘𝐁𝐑𝐈𝐃 🟢</h1>
-            <p class="live">● LIVE • ORIGINAL GROK DESIGN • ZERO RISK MODE</p>
+            <h1>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟑.𝟑 𝐄𝐋𝐈𝐓𝐄 🟢</h1>
+            <p class="live">● LIVE • HYBRID SIZE+COLOR • ZERO RISK</p>
             <div class="box">
                 <div class="stat">Win Rate: <b>\( {winrate}%</b> ( \){state.wins}/${state.totalSignals})</div>
                 <div class="stat">Level: <b>L${state.currentLevel + 1}</b> • Max Rs.100</div>
-                <div class="stat">Safety Pause: <b>\( {state.safetyPause}</b> • Consec Losses: <b> \){state.consecutiveLosses}</b></div>
+                <div class="stat">Safety Pause: <b>${state.safetyPause}</b></div>
                 <div class="stat">Status: <span style="color:#39ff14">${status}</span></div>
             </div>
             <p style="color:#555;font-size:13px;">Auto-refresh every 8s • ${new Date().toLocaleTimeString()}</p>
         </body></html>
     `); 
 }); 
-app.listen(PORT, () => console.log(`🚀 Kira Quantum V33.2 Elite listening on port ${PORT}`)); 
+app.listen(PORT, () => console.log(`🚀 Kira Quantum V33.3 Elite running on port ${PORT}`)); 
 
 // ========================================== 
 // ⚙️ CONFIG 
 // ========================================== 
-const BOT_TOKEN = "7574355493:AAG0s6pMeF-W3X4A_Z0htyyeyHygKDCbdak"; 
+const BOT_TOKEN = "7574355493:AAEFVoqMqFBgnLD52r9JYrm1sEuJ2nQObR0"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"]; 
 const API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30"; 
 
@@ -48,7 +48,7 @@ const HEADERS = {
 }; 
 
 // ========================================== 
-// 🧠 STATE 
+// 🧠 STATE + AUTO RESET ON BOOT
 // ========================================== 
 const STATE_FILE = './kira_state.json'; 
 let state = { 
@@ -71,7 +71,16 @@ function loadState() {
     } 
 } 
 function saveState() { fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2)); } 
-loadState(); 
+
+loadState();
+
+// AUTO RESET PAUSES ON EVERY RESTART (no more stuck)
+state.violetPause = 0;
+state.safetyPause = 0;
+state.consecutiveLosses = 0;
+state.currentLevel = 0;
+state.lastPauseSent = null;
+saveState();
 
 async function sendTelegram(text) { 
     for (let chat_id of TARGET_CHATS) { 
@@ -88,11 +97,12 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟑.𝟐 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>My Original Premium Hybrid Activated\nSure-Shot Logic • Max Protection</i>`); 
+    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟑.𝟑 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>My Original Premium Hybrid Activated\nSure-Shot Logic • Max Protection</i>`); 
+    sendTelegram(`🔄 <b>LIVE SCANNING STARTED</b> 🔄\n━━━━━━━━━━━━━━━━━━\nKira is now watching every new period.\nFirst signal coming soon...`); 
 } 
 
 // ========================================== 
-// 🧠 MY ORIGINAL HYBRID BRAIN
+// 🧠 HYBRID BRAIN (MY ORIGINAL)
 // ========================================== 
 function getSize(n) { return Number(n) <= 4 ? "SMALL" : "BIG"; } 
 function getColor(n) { return [0,2,4,6,8].includes(Number(n)) ? "RED" : "GREEN"; } 
@@ -100,18 +110,13 @@ function getColor(n) { return [0,2,4,6,8].includes(Number(n)) ? "RED" : "GREEN";
 function getStreak(arr) {
     if (arr.length < 2) return 1;
     let len = 1;
-    for (let i = 1; i < arr.length; i++) {
-        if (arr[i] === arr[0]) len++;
-        else break;
-    }
+    for (let i = 1; i < arr.length; i++) if (arr[i] === arr[0]) len++; else break;
     return len;
 }
 
 function getAlts(arr) {
     let count = 0;
-    for (let i = 1; i < Math.min(20, arr.length); i++) {
-        if (arr[i] !== arr[i-1]) count++;
-    }
+    for (let i = 1; i < Math.min(20, arr.length); i++) if (arr[i] !== arr[i-1]) count++;
     return count;
 }
 
@@ -148,7 +153,7 @@ function analyze(hist, type, level) {
 }
 
 // ========================================== 
-// ⚙️ MAIN LOOP (BUG-FREE)
+// ⚙️ MAIN LOOP 
 // ========================================== 
 let isProcessing = false; 
 
@@ -208,7 +213,7 @@ async function tick() {
             saveState(); 
         } 
         
-        // NEW SIGNAL OR PAUSE
+        // NEW SIGNAL
         if(state.lastProcessedIssue !== latestIssue && !state.activePrediction) { 
             state.lastProcessedIssue = latestIssue; 
 
@@ -234,7 +239,7 @@ async function tick() {
                 let bar = signal.conf >= 93 ? "🟩🟩🟩🟩🟩" : "🟩🟩🟩🟩⬜";
                 let emoji = signal.type === "COLOR" ? "🎨" : "📏";
 
-                let msg = `⚡️ <b>KIRA QUANTUM V33.2 ELITE</b> ⚡️\n━━━━━━━━━━━━━━━━━━\n`;
+                let msg = `⚡️ <b>KIRA QUANTUM V33.3 ELITE</b> ⚡️\n━━━━━━━━━━━━━━━━━━\n`;
                 msg += `🎯 Period: <code>${targetIssue.slice(-4)}</code>\n`;
                 msg += `${emoji} <b>Hybrid Signal:</b> ${signal.type}\n`;
                 msg += `🔮 <b>Prediction:</b> ${signal.action}\n`;
