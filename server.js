@@ -1,5 +1,6 @@
 const express = require('express');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,7 +12,7 @@ app.get('/', (req, res) => {
     res.send(`
         <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;">
             <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 𝐎𝐍𝐋𝐈𝐍𝐄 🧠</h2>
-            <p>Neural Network connected to WinGo live data stream.</p>
+            <p>Dual-Scan Neural Network connected to WinGo live data stream.</p>
         </body>
     `);
 });
@@ -40,7 +41,6 @@ const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 // ==========================================
 // 🧠 MEMORY & STATE
 // ==========================================
-const fs = require('fs');
 const STATE_FILE = './jarvis_state.json'; 
 let state = { 
     lastProcessedIssue: null, 
@@ -75,7 +75,7 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Neural Network linked to Casino API.</i>\n⚡ <i>LLM Prediction Engine Active.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
+    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Dual-Scan Neural Network Linked.</i>\n⚡ <i>Evaluating Color vs. Size logic.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
@@ -84,7 +84,7 @@ if (!state.isStarted) {
 // ==========================================
 async function getAIPrediction(historyList) {
     try {
-        // Format the last 20 results for the AI to read easily
+        // Format the last 20 results for the AI
         let historyString = historyList.slice(0, 20).map(i => {
             let num = Number(i.number);
             let size = num <= 4 ? "SMALL" : "BIG";
@@ -92,24 +92,28 @@ async function getAIPrediction(historyList) {
             return `Num: ${num}, Size: ${size}, Color: ${color}`;
         }).join(" | ");
 
+        // 🧠 THE ULTIMATE PROMPT (Makes the AI actually think)
         const prompt = `
-        You are JᴀʀᴠᎥຮ, an elite predictive AI analyzing a 1-minute casino game (WinGo). 
-        The game outputs numbers 0-9. 0-4 is SMALL, 5-9 is BIG. Even numbers (and 0) are RED, Odd numbers (and 5) are GREEN.
-        Here are the last 20 results (newest to oldest):
+        You are JᴀʀᴠᎥຮ, an elite predictive neural network analyzing a 1-minute casino market.
+        
+        Here are the last 20 results (Newest to Oldest):
         ${historyString}
 
-        Your job is to predict the NEXT outcome. You must choose either SIZE (BIG/SMALL) or COLOR (RED/GREEN).
-        If the market is too chaotic, choose to WAIT.
-        
-        Respond STRICTLY in valid JSON format with no markdown, no code blocks, and no extra text. Use this exact structure:
-        {"type": "SIZE or COLOR or NONE", "action": "BIG or SMALL or RED or GREEN or WAIT", "confidence": a number between 85 and 99, "reason": "A short, cool sounding 5-word explanation of the pattern you see"}
+        YOUR MISSION:
+        1. Evaluate the 'SIZE' pattern (BIG/SMALL).
+        2. Evaluate the 'COLOR' pattern (RED/GREEN).
+        3. Compare them. Which trend is mathematically and logically STRONGER right now? 
+        4. If both are noisy, chaotic, or a 0/5 recently disrupted the board, you MUST output WAIT to protect the capital.
+
+        Respond STRICTLY in valid JSON format exactly like this, with no markdown formatting or extra words:
+        {"type": "SIZE or COLOR or NONE", "action": "BIG or SMALL or RED or GREEN or WAIT", "confidence": <number between 85 and 99>, "reason": "<A highly analytical, 5 to 8 word explanation of why you chose this exact outcome>"}
         `;
 
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const result = await model.generateContent(prompt);
         let aiText = result.response.text().trim();
         
-        // Clean up markdown if Gemini accidentally adds it
+        // Clean JSON from Gemini markdown wrappers
         if(aiText.startsWith('```json')) { aiText = aiText.replace(/```json/g, '').replace(/```/g, '').trim(); }
         if(aiText.startsWith('```')) { aiText = aiText.replace(/```/g, '').trim(); }
 
@@ -117,9 +121,8 @@ async function getAIPrediction(historyList) {
         return decision;
 
     } catch (error) {
-        console.log("Gemini API Error:", error.message);
-        // Fallback safety if API fails
-        return { type: "NONE", action: "WAIT", confidence: 0, reason: "Neural Network Syncing..." };
+        console.log("Gemini AI Error:", error.message);
+        return { type: "NONE", action: "WAIT", confidence: 0, reason: "Neural Network calculating probabilities..." };
     }
 }
 
