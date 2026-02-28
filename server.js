@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => {
     res.send(`
         <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;">
-            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐀𝐍𝐓𝐈-𝐁𝐋𝐎𝐂𝐊) 🧠</h2>
-            <p>Mobile Spoofing Active. API Firewall Bypass Engaged.</p>
+            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐕𝐄𝐑𝐒𝐈𝐎𝐍 𝟐.𝟓) 🧠</h2>
+            <p>Gemini 2.5 Flash Active. API Firewall Bypass Engaged.</p>
         </body>
     `);
 });
@@ -21,14 +21,17 @@ app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ AI Predictor Server lis
 // ==========================================
 // ⚙️ CONFIGURATION
 // ==========================================
-const TELEGRAM_BOT_TOKEN = "7574355493:AAFdjiO63tdigh5WdaKFro3yFwXDUVuLGuQ"; 
+const TELEGRAM_BOT_TOKEN = "7574355493:AAF873XoLn6sUaSrpjMmhd1alhremmObKXA"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"];
+
+// ⚠️ YOUR BRAND NEW API KEY GOES HERE
 const GEMINI_API_KEY = "AIzaSyCkR1OJ27KwmeNkvgQNqDPV4UQNUuOcZrc"; 
+
 const WINGO_API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30";
 
 const FUND_LEVELS = [33, 66, 130, 260, 550, 1100]; 
 
-// 🚨 PATCH: Aggressive Mobile Browser Spoofing
+// 🛡️ Mobile Browser Spoofing (Bypasses the Casino Firewall)
 const HEADERS = { 
     "User-Agent": "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36", 
     "Accept": "application/json, text/plain, */*", 
@@ -85,7 +88,7 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Gemini 1.5 Flash Neural Network Linked.</i>\n🛡️ <i>Mobile API Spoofing Active.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
+    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Gemini 2.5 Flash Neural Network Linked.</i>\n🛡️ <i>Mobile API Spoofing Active.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
@@ -117,7 +120,8 @@ async function getAIPrediction(historyList) {
         {"type": "SIZE or COLOR or NONE", "action": "BIG or SMALL or RED or GREEN or WAIT", "confidence": 95, "reason": "Short 5 word reason"}
         `;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySettings });
+        // 🚨 PATCH: Upgraded to 2.5 Flash because 1.5 is retired for new keys!
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", safetySettings });
         const result = await model.generateContent(prompt);
         let aiText = result.response.text().trim();
         
@@ -149,16 +153,13 @@ async function tick() {
     try { 
         const res = await fetch(WINGO_API + "&_t=" + Date.now(), { headers: HEADERS, timeout: 8000 }); 
         
-        // 🚨 PATCH: Read the raw text first to catch the HTML firewall page
         const rawText = await res.text();
         let data;
         
         try {
             data = JSON.parse(rawText);
         } catch (parseError) {
-            // This is where we catch the "<!DOCTYPE html>" error!
             console.log(`\n[FIREWALL BLOCKED] The casino returned a security page instead of JSON.`);
-            console.log(`[FIREWALL RAW DATA]: ${rawText.substring(0, 200)}...`);
             throw new Error("Casino Firewall Blocked Connection.");
         }
 
