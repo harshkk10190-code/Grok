@@ -20,7 +20,7 @@ app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ AI Predictor Server lis
 // ==========================================
 // ⚙️ CONFIGURATION
 // ==========================================
-const TELEGRAM_BOT_TOKEN = "7574355493:AAHk8TOKpsbR23OhDr7gtqaLBNFZlhpSlxs"; 
+const TELEGRAM_BOT_TOKEN = "7574355493:AAF873XoLn6sUaSrpjMmhd1alhremmObKXA"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"];
 
 // 🔒 THE VAULT: Pulling the key safely from Render
