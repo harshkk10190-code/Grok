@@ -1,5 +1,5 @@
 const express = require('express');
-const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require('@google/generative-ai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
 
 const app = express();
@@ -12,7 +12,7 @@ app.get('/', (req, res) => {
     res.send(`
         <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;">
             <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐕𝐄𝐑𝐒𝐈𝐎𝐍 𝟐.𝟓) 🧠</h2>
-            <p>Gemini 2.5 Flash Active. API Firewall Bypass Engaged.</p>
+            <p>Gemini 2.5 Flash Active. Factory Defaults Engaged.</p>
         </body>
     `);
 });
@@ -42,14 +42,6 @@ const HEADERS = {
 }; 
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-// 🚨 PATCH: Adjusted to BLOCK_ONLY_HIGH to comply with Free Tier restrictions
-const safetySettings = [
-  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH },
-];
 
 // ==========================================
 // 🧠 MEMORY & STATE
@@ -89,7 +81,7 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Gemini 2.5 Flash Neural Network Linked.</i>\n🛡️ <i>Compliance Mode Bypassed.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
+    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Gemini 2.5 Flash Neural Network Linked.</i>\n✅ <i>Factory Protocols Engaged.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
@@ -121,7 +113,8 @@ async function getAIPrediction(historyList) {
         {"type": "SIZE or COLOR or NONE", "action": "BIG or SMALL or RED or GREEN or WAIT", "confidence": 95, "reason": "Short 5 word reason"}
         `;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", safetySettings });
+        // 🚨 PATCH: Completely removed safetySettings so Google doesn't block the request!
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const result = await model.generateContent(prompt);
         let aiText = result.response.text().trim();
         
