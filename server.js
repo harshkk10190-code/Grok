@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => {
     res.send(`
         <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;">
-            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐏𝐀𝐓𝐂𝐇 𝟏.𝟓) 🧠</h2>
-            <p>1.5-Flash Model Active. 403 Bypassed.</p>
+            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐋𝐈𝐕𝐄 𝐋𝐎𝐆 𝐌𝐎𝐃𝐄) 🧠</h2>
+            <p>1.5-Flash Active. Check Render Logs for live AI thoughts.</p>
         </body>
     `);
 });
@@ -23,10 +23,7 @@ app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ AI Predictor Server lis
 // ==========================================
 const TELEGRAM_BOT_TOKEN = "7574355493:AAFdjiO63tdigh5WdaKFro3yFwXDUVuLGuQ"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"];
-
-// ⚠️ PASTE YOUR BRAND NEW API KEY HERE
 const GEMINI_API_KEY = "AIzaSyCkR1OJ27KwmeNkvgQNqDPV4UQNUuOcZrc"; 
-
 const WINGO_API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30";
 
 const FUND_LEVELS = [33, 66, 130, 260, 550, 1100]; 
@@ -40,7 +37,6 @@ const HEADERS = {
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-// 🛑 FORCE DISABLE GOOGLE SAFETY FILTERS
 const safetySettings = [
   { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
   { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
@@ -86,7 +82,7 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Gemini 1.5 Flash Neural Network Linked.</i>\n🔓 <i>403 Forbidden Lock Bypassed.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
+    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Gemini 1.5 Flash Neural Network Linked.</i>\n👁️ <i>Live Admin Terminal Active.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
@@ -118,7 +114,6 @@ async function getAIPrediction(historyList) {
         {"type": "SIZE or COLOR or NONE", "action": "BIG or SMALL or RED or GREEN or WAIT", "confidence": 95, "reason": "Short 5 word reason"}
         `;
 
-        // 🚨 PATCH: Switched model to gemini-1.5-flash to bypass free tier 403 blocks
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash", safetySettings });
         const result = await model.generateContent(prompt);
         let aiText = result.response.text().trim();
@@ -131,7 +126,6 @@ async function getAIPrediction(historyList) {
         }
 
     } catch (error) {
-        console.log("Gemini AI Error:", error.message);
         let cleanError = error.message.replace(/[\n\r]/g, " ").substring(0, 150); 
         return { type: "NONE", action: "WAIT", confidence: 0, reason: `ERR: ${cleanError}` };
     }
@@ -214,6 +208,9 @@ async function tick() {
             if(!state.activePrediction) { 
 
                 const signal = await getAIPrediction(list);
+                
+                // 🚨 LIVE TERMINAL LOG: Prints to Render so you know it's not frozen
+                console.log(`\n[${new Date().toLocaleTimeString()}] 🎯 Period ${targetIssue.slice(-4)} | AI DECISION:`, signal);
                 
                 if(signal && signal.action === "WAIT") { 
                     state.waitCount++;
