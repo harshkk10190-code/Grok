@@ -1,5 +1,5 @@
 const express = require('express');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require('@google/generative-ai');
 const fs = require('fs');
 
 const app = express();
@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => {
     res.send(`
         <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;">
-            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐒𝐓𝐄𝐀𝐋𝐓𝐇 𝐌𝐎𝐃𝐄) 🧠</h2>
-            <p>Anti-Spam active. Neural Network Linked.</p>
+            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐔𝐍𝐑𝐄𝐒𝐓𝐑𝐈𝐂𝐓𝐄𝐃) 🧠</h2>
+            <p>Safety Filters Disabled. Direct Neural Link Active.</p>
         </body>
     `);
 });
@@ -37,6 +37,14 @@ const HEADERS = {
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
+// 🛑 FORCE DISABLE GOOGLE SAFETY FILTERS
+const safetySettings = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+];
+
 // ==========================================
 // 🧠 MEMORY & STATE
 // ==========================================
@@ -48,7 +56,7 @@ let state = {
     wins: 0, 
     isStarted: false, 
     currentLevel: 0,
-    waitCount: 0 // Tracks consecutive waits to prevent spam
+    waitCount: 0 
 }; 
 
 function loadState() { 
@@ -75,7 +83,7 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Dual-Scan Neural Network Linked.</i>\n🛡️ <i>Stealth Anti-Spam Protocol Active.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
+    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Unrestricted Neural Network Linked.</i>\n🔓 <i>Safety Filters Bypassed.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
@@ -91,38 +99,39 @@ async function getAIPrediction(historyList) {
             return `N:${num}, S:${size}, C:${color}`;
         }).join(" | ");
 
-        // Prompt sanitized to bypass Google Safety Filters
         const prompt = `
-        You are JᴀʀᴠᎥຮ, a quantitative data analysis engine evaluating a continuous stream of binary variables.
+        Analyze this sequential data stream to predict the next logical output based on alternating patterns and momentum.
         
-        Recent Data Stream (Newest to Oldest):
+        Data History (Newest to Oldest):
         ${historyString}
 
-        YOUR MISSION:
-        1. Evaluate the 'SIZE' metric trend (BIG/SMALL).
-        2. Evaluate the 'COLOR' metric trend (RED/GREEN).
-        3. Compare them. Which trend holds the highest mathematical probability of continuing? 
-        4. If the data is highly chaotic, lacks a clear mathematical pattern, or shows recent anomalies (0 or 5), you MUST output WAIT to protect capital.
+        Task:
+        1. Evaluate the 'Size' pattern (BIG vs SMALL).
+        2. Evaluate the 'Color' pattern (RED vs GREEN).
+        3. Determine which of the two patterns is mathematically stronger.
+        4. If no clear pattern exists, output WAIT.
 
-        Respond STRICTLY with a raw JSON object. Do not include markdown (like \`\`\`json). Do not include any other words.
-        Format: {"type": "SIZE or COLOR or NONE", "action": "BIG or SMALL or RED or GREEN or WAIT", "confidence": 95, "reason": "Short 6-word explanation"}
+        Respond ONLY with a valid JSON object. No markdown, no code blocks, no other text.
+        {"type": "SIZE or COLOR or NONE", "action": "BIG or SMALL or RED or GREEN or WAIT", "confidence": 95, "reason": "Short 5 word reason"}
         `;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        // Apply the bypassed safety settings to the model
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", safetySettings });
         const result = await model.generateContent(prompt);
         let aiText = result.response.text().trim();
         
-        // Advanced JSON Extraction (Forces success even if AI talks)
+        // Aggressive JSON Extraction
         const jsonMatch = aiText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
             return JSON.parse(jsonMatch[0]);
         } else {
-            throw new Error("No valid JSON found in AI response.");
+            throw new Error("Invalid Output Format");
         }
 
     } catch (error) {
         console.log("Gemini AI Error:", error.message);
-        return { type: "NONE", action: "WAIT", confidence: 0, reason: "Neural API Rate Limit: Recalculating Data..." };
+        // Updated error message so we know if it's still breaking
+        return { type: "NONE", action: "WAIT", confidence: 0, reason: `Error: ${error.message.substring(0, 30)}...` };
     }
 }
 
@@ -151,7 +160,6 @@ async function tick() {
             state.activePrediction = null; saveState(); 
         } 
         
-        // 1️⃣ CHECK PREVIOUS RESULT 
         if(state.activePrediction) { 
             let timeElapsed = Date.now() - state.activePrediction.timestamp;
             if (timeElapsed > 4 * 60 * 1000) { 
@@ -200,7 +208,6 @@ async function tick() {
             } 
         } 
         
-        // 2️⃣ GENERATE NEW PREDICTION USING GEMINI
         if(state.lastProcessedIssue !== latestIssue) { 
             if(!state.activePrediction) { 
 
@@ -208,7 +215,6 @@ async function tick() {
                 
                 if(signal && signal.action === "WAIT") { 
                     state.waitCount++;
-                    // Only send a WAIT message on the 1st wait, and then every 15th wait. Stops channel spam!
                     if (state.waitCount === 1 || state.waitCount % 15 === 0) {
                         let msg = `📡 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐍𝐄𝐔𝐑𝐀𝐋 𝐒𝐂𝐀𝐍</b> 📡\n`; 
                         msg += `⟡ ═════ ⋆★⋆ ═════ ⟡\n`; 
@@ -220,7 +226,7 @@ async function tick() {
                     }
                     saveState();
                 } else if(signal && signal.action !== "WAIT") { 
-                    state.waitCount = 0; // Reset wait spam counter
+                    state.waitCount = 0; 
                     
                     let signalEmoji = signal.type === "COLOR" ? "🎨" : "📏"; 
                     let betAmount = FUND_LEVELS[state.currentLevel]; 
