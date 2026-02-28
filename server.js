@@ -10,8 +10,8 @@ const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => {
     res.send(`
         <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;">
-            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐑𝐀𝐖 𝐂𝐎𝐍𝐍𝐄𝐂𝐓𝐈𝐎𝐍) 🧠</h2>
-            <p>Google SDK Removed. Direct v1beta API Link Active.</p>
+            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐒𝐄𝐂𝐔𝐑𝐄 𝐌𝐎𝐃𝐄) 🧠</h2>
+            <p>Environment Variables Locked. AI Active.</p>
         </body>
     `);
 });
@@ -20,11 +20,11 @@ app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ AI Predictor Server lis
 // ==========================================
 // ⚙️ CONFIGURATION
 // ==========================================
-const TELEGRAM_BOT_TOKEN = "7574355493:AAF873XoLn6sUaSrpjMmhd1alhremmObKXA"; 
+const TELEGRAM_BOT_TOKEN = "7574355493:AAHk8TOKpsbR23OhDr7gtqaLBNFZlhpSlxs"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"];
 
-// ⚠️ PASTE YOUR NEW API KEY HERE
-const GEMINI_API_KEY = "AIzaSyCkR1OJ27KwmeNkvgQNqDPV4UQNUuOcZrc"; 
+// 🔒 THE VAULT: Pulling the key safely from Render
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
 
 const WINGO_API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30";
 const FUND_LEVELS = [33, 66, 130, 260, 550, 1100]; 
@@ -77,14 +77,18 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Raw API Connection Linked.</i>\n✅ <i>Google SDK Bypassed.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
+    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Raw API Connection Linked.</i>\n🔒 <i>Vault Security Engaged.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
 // ==========================================
-// 🤖 RAW GEMINI API PREDICTION ENGINE (NO SDK)
+// 🤖 RAW GEMINI API PREDICTION ENGINE
 // ==========================================
 async function getAIPrediction(historyList) {
+    if (!GEMINI_API_KEY) {
+        return { type: "NONE", action: "WAIT", confidence: 0, reason: "ERR: Missing API Key in Render Environment!" };
+    }
+
     try {
         let historyString = historyList.slice(0, 20).map(i => {
             let num = Number(i.number);
@@ -109,7 +113,6 @@ async function getAIPrediction(historyList) {
         {"type": "SIZE or COLOR or NONE", "action": "BIG or SMALL or RED or GREEN or WAIT", "confidence": 95, "reason": "Short 5 word reason"}
         `;
 
-        // 🚨 PATCH: Direct HTTP connection to Google's backend
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
         
         const response = await fetch(apiUrl, {
@@ -122,7 +125,6 @@ async function getAIPrediction(historyList) {
 
         const data = await response.json();
 
-        // If Google rejects us, grab the EXACT reason why
         if (!response.ok) {
             let realError = data.error?.message || "Unknown Google Error";
             console.log("\n[RAW GOOGLE ERROR]:", JSON.stringify(data, null, 2));
