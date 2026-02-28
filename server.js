@@ -1,35 +1,31 @@
-const express = require('express'); 
-const fs = require('fs'); 
-const app = express(); 
-const PORT = process.env.PORT || 3000; 
+const express = require('express');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 // ==========================================
 // 🌐 WEB MONITOR 
 // ==========================================
-app.get('/', (req, res) => { 
-    const winrate = state.totalSignals > 0 ? Math.round((state.wins / state.totalSignals) * 100) : 100;
-    res.send(` 
-        <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;"> 
-            <h2>🟢 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟒 𝐒𝐈𝐙𝐄 𝐎𝐍𝐋𝐘 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</h2> 
-            <p>Smart Size Logic • Clean Messages • Never Stops</p> 
-            <div style="background:#0a0a1f;padding:20px;border-radius:15px;margin:20px;display:inline-block;">
-                <p><strong>Win Rate:</strong> ` + winrate + `% (` + state.wins + `/` + state.totalSignals + `)</p>
-                <p><strong>Level:</strong> ` + (state.currentLevel + 1) + `</p>
-            </div>
-            <p style="color:#aaa; font-size:12px;">Monitoring: WinGo 1-Minute API</p> 
-        </body> 
-    `); 
-}); 
-app.listen(PORT, () => console.log(`🚀 Kira Quantum V34.4 Size-Only Elite running`)); 
+app.get('/', (req, res) => {
+    res.send(`
+        <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;">
+            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 𝐎𝐍𝐋𝐈𝐍𝐄 🧠</h2>
+            <p>Neural Network connected to WinGo live data stream.</p>
+        </body>
+    `);
+});
+app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ AI Predictor Server listening on port ${PORT}`));
 
-// ========================================== 
-// ⚙️ CONFIG 
-// ========================================== 
-const BOT_TOKEN = "7574355493:AAGDeKaIBU9gN935fn1qqvTvRKuOPerekoU"; 
-const TARGET_CHATS = ["1669843747", "-1002613316641"]; 
-const API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30"; 
+// ==========================================
+// ⚙️ CONFIGURATION
+// ==========================================
+const TELEGRAM_BOT_TOKEN = "7574355493:AAHk8TOKpsbR23OhDr7gtqaLBNFZlhpSlxs"; 
+const TARGET_CHATS = ["1669843747", "-1002613316641"];
+const GEMINI_API_KEY = "AIzaSyB_MiGFRKNS_0bL-gXCp6deGAkkcTzDobs"; 
+const WINGO_API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30";
 
-const FUND_LEVELS = [33, 66, 100]; 
+const FUND_LEVELS = [33, 66, 130, 260, 550, 1100]; // 6 Level Safety Net
 
 const HEADERS = { 
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 
@@ -38,30 +34,36 @@ const HEADERS = {
     "Referer": "https://www.dmwin2.com/" 
 }; 
 
-// ========================================== 
-// 🧠 STATE - FRESH START
-// ========================================== 
-const STATE_FILE = './kira_state.json'; 
-if (fs.existsSync(STATE_FILE)) fs.unlinkSync(STATE_FILE);
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
+// ==========================================
+// 🧠 MEMORY & STATE
+// ==========================================
+const fs = require('fs');
+const STATE_FILE = './jarvis_state.json'; 
 let state = { 
     lastProcessedIssue: null, 
     activePrediction: null, 
     totalSignals: 0, 
     wins: 0, 
     isStarted: false, 
-    currentLevel: 0,
-    violetPause: 0,
-    consecutiveLosses: 0,
-    safetyPause: 0
+    currentLevel: 0
 }; 
 
+function loadState() { 
+    if (fs.existsSync(STATE_FILE)) { 
+        try { state = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); } 
+        catch(e) { console.log("Memory reset."); } 
+    } 
+} 
 function saveState() { fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2)); } 
+loadState(); 
 
 async function sendTelegram(text) { 
     for (let chat_id of TARGET_CHATS) { 
         try { 
-            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, { 
+            await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ chat_id: chat_id, text: text, parse_mode: 'HTML' }) 
@@ -73,69 +75,68 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    sendTelegram(`🟢 <b>𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟒 𝐒𝐈𝐙𝐄 𝐎𝐍𝐋𝐘 𝐄𝐋𝐈𝐓𝐄 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🟢\n━━━━━━━━━━━━━━━━━━\n📡 <i>Clean Size-Only Logic Activated\nSure-Shot + Never Stops</i>`); 
-    sendTelegram(`🔄 <b>LIVE SCANNING STARTED</b> 🔄\nKira is now watching every new period.\nFirst signal coming soon...`); 
+    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Neural Network linked to Casino API.</i>\n⚡ <i>LLM Prediction Engine Active.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
+    sendTelegram(bootMsg); 
 } 
 
-// ========================================== 
-// 🧠 SIZE-ONLY BRAIN
-// ========================================== 
-function getSize(n) { return Number(n) <= 4 ? "SMALL" : "BIG"; } 
+// ==========================================
+// 🤖 GEMINI AI PREDICTION ENGINE
+// ==========================================
+async function getAIPrediction(historyList) {
+    try {
+        // Format the last 20 results for the AI to read easily
+        let historyString = historyList.slice(0, 20).map(i => {
+            let num = Number(i.number);
+            let size = num <= 4 ? "SMALL" : "BIG";
+            let color = [0,2,4,6,8].includes(num) ? "RED" : "GREEN";
+            return `Num: ${num}, Size: ${size}, Color: ${color}`;
+        }).join(" | ");
 
-function getStreakLength(arr) {
-    if (arr.length < 2) return 1;
-    let len = 1;
-    for (let i = 1; i < arr.length; i++) {
-        if (arr[i] === arr[0]) len++;
-        else break;
+        const prompt = `
+        You are JᴀʀᴠᎥຮ, an elite predictive AI analyzing a 1-minute casino game (WinGo). 
+        The game outputs numbers 0-9. 0-4 is SMALL, 5-9 is BIG. Even numbers (and 0) are RED, Odd numbers (and 5) are GREEN.
+        Here are the last 20 results (newest to oldest):
+        ${historyString}
+
+        Your job is to predict the NEXT outcome. You must choose either SIZE (BIG/SMALL) or COLOR (RED/GREEN).
+        If the market is too chaotic, choose to WAIT.
+        
+        Respond STRICTLY in valid JSON format with no markdown, no code blocks, and no extra text. Use this exact structure:
+        {"type": "SIZE or COLOR or NONE", "action": "BIG or SMALL or RED or GREEN or WAIT", "confidence": a number between 85 and 99, "reason": "A short, cool sounding 5-word explanation of the pattern you see"}
+        `;
+
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const result = await model.generateContent(prompt);
+        let aiText = result.response.text().trim();
+        
+        // Clean up markdown if Gemini accidentally adds it
+        if(aiText.startsWith('```json')) { aiText = aiText.replace(/```json/g, '').replace(/```/g, '').trim(); }
+        if(aiText.startsWith('```')) { aiText = aiText.replace(/```/g, '').trim(); }
+
+        const decision = JSON.parse(aiText);
+        return decision;
+
+    } catch (error) {
+        console.log("Gemini API Error:", error.message);
+        // Fallback safety if API fails
+        return { type: "NONE", action: "WAIT", confidence: 0, reason: "Neural Network Syncing..." };
     }
-    return len;
-}
-
-function getAlternationCount(arr) {
-    let count = 0;
-    for (let i = 1; i < Math.min(15, arr.length); i++) {
-        if (arr[i] !== arr[i-1]) count++;
-    }
-    return count;
-}
-
-function analyzeSize(history, currentLevel) {
-    if (history.length < 8) return { action: "SMALL", conf: 75, reason: "Gathering data" };
-
-    const last = history[0];
-    const streak = getStreakLength(history);
-    const alts = getAlternationCount(history);
-
-    let action = last;
-    let reason = "Mirror Logic: Riding Current Momentum";
-    let conf = 80 + (streak * 3);
-
-    if (streak >= 4) {
-        reason = "Strong " + streak + "x Streak - Riding Momentum";
-        conf = 93;
-    } else if (alts >= 8 || currentLevel >= 1) {
-        action = last === "BIG" ? "SMALL" : "BIG";
-        reason = "Safe Recovery: High Alternation";
-        conf = 86 + Math.floor(alts * 1.2);
-    }
-
-    if (currentLevel >= 1) conf = Math.max(91, Math.min(97, conf));
-
-    return { type: "SIZE", action, conf, reason };
 }
 
 // ========================================== 
-// ⚙️ MAIN LOOP - FIXED TO NEVER STOP
+// ⚙️ SERVER MAIN LOOP 
 // ========================================== 
 let isProcessing = false; 
+
+function getSize(n) { return n <= 4 ? "SMALL" : "BIG"; } 
+function getColor(n) { return [0,2,4,6,8].includes(n) ? "RED" : "GREEN"; } 
 
 async function tick() { 
     if(isProcessing) return; 
     isProcessing = true; 
     
     try { 
-        const res = await fetch(API + "&_t=" + Date.now(), { headers: HEADERS, timeout: 8000 }); 
+        const res = await fetch(WINGO_API + "&_t=" + Date.now(), { headers: HEADERS, timeout: 8000 }); 
         const data = await res.json(); 
         if(!data.data || !data.data.list) throw new Error("API Issue"); 
         
@@ -143,90 +144,98 @@ async function tick() {
         const latestIssue = list[0].issueNumber; 
         const targetIssue = (BigInt(latestIssue) + 1n).toString(); 
         
-        let currentNum = Number(list[0].number);
-        if (currentNum === 0 || currentNum === 5) {
-            state.violetPause = Math.max(state.violetPause, currentNum === 5 ? 3 : 2);
-        }
-
-        // 1. CHECK PREVIOUS RESULT
-        if(state.activePrediction && BigInt(latestIssue) >= BigInt(state.activePrediction.period)) { 
-            const resultItem = list.find(i => i.issueNumber === state.activePrediction.period); 
-            if(resultItem) { 
-                let actualNum = Number(resultItem.number); 
-                let actualResult = getSize(actualNum); 
-                let isWin = (actualResult === state.activePrediction.pred); 
-                
-                if(isWin) { 
-                    state.wins++; 
-                    state.currentLevel = 0; 
-                    state.consecutiveLosses = 0;
-                } else { 
-                    state.currentLevel = Math.min(state.currentLevel + 1, 2); 
-                    state.consecutiveLosses++;
-                } 
-                state.totalSignals++; 
-
-                let currentAccuracy = Math.round((state.wins / state.totalSignals) * 100); 
-                
-                let resMsg = isWin ? `✅ <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐄𝐋𝐈𝐌𝐈𝐍𝐀𝐓𝐄𝐃</b> ✅\n` : `❌ <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> ❌\n`; 
-                resMsg += `━━━━━━━━━━━━━━━━━━\n`; 
-                resMsg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝  : <code>` + state.activePrediction.period.slice(-4) + `</code>\n`; 
-                resMsg += `🎲 𝐑𝐞𝐬𝐮𝐥𝐭  : <b>` + actualNum + ` (` + actualResult + `)</b>\n`; 
-                resMsg += `━━━━━━━━━━━━━━━━━━\n`; 
-                resMsg += isWin ? `💰 𝐒𝐭𝐚𝐭𝐮𝐬   : <b>PROFIT SECURED!</b>\n` : `🛡️ 𝐒𝐭𝐚𝐭𝐮𝐬   : <b>ESCALATING (L` + (state.currentLevel + 1) + `)</b>\n`; 
-                resMsg += `🎯 𝐒𝐞𝐪𝐮𝐞𝐧𝐜𝐞 𝐒𝐮𝐜𝐜𝐞𝐬𝐬: <b>` + currentAccuracy + `%</b>\n`; 
-                
-                await sendTelegram(resMsg); 
-
-                if (!isWin && state.currentLevel === 2) {
-                    state.safetyPause = 15;
-                    state.currentLevel = 0;
-                    state.consecutiveLosses = 0;
-                    await sendTelegram(`🛡️ <b>ELITE SAFETY ACTIVATED</b> 🛡️\nL3 failed. Skipping 15 periods & resetting to L1. Funds protected.`);
-                }
-            } 
-            state.activePrediction = null; 
-            saveState(); 
+        if(state.activePrediction && BigInt(latestIssue) >= BigInt(state.activePrediction.period) + 2n) { 
+            state.activePrediction = null; saveState(); 
         } 
         
-        // 2. GENERATE NEW SIGNAL FOR EVERY NEW PERIOD (FIXED)
-        if(state.lastProcessedIssue !== latestIssue && !state.activePrediction) { 
-            state.lastProcessedIssue = latestIssue; 
-
-            if (state.violetPause > 0 || state.safetyPause > 0) {
-                let pauseType = state.violetPause > 0 ? "Violet Trap" : "Elite Safety";
-                let left = state.violetPause > 0 ? state.violetPause : state.safetyPause;
-                let msg = `📡 <b>𝐊𝐈𝐑𝐀 𝐑𝐀𝐃𝐀𝐑 𝐒𝐂𝐀𝐍</b> 📡\n━━━━━━━━━━━━━━━━━━\n🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>` + targetIssue.slice(-4) + `</code>\n⚠️ <b>𝐀𝐜𝐭𝐢𝐨𝐧:</b> WAIT\n📉 <b>𝐑𝐞𝐚𝐬𝐨𝐧:</b> <i>` + pauseType + ` Detected. Protecting funds (` + left + ` left)</i>`;
-                await sendTelegram(msg); 
-                if (state.violetPause > 0) state.violetPause--;
-                if (state.safetyPause > 0) state.safetyPause--;
-                saveState();
+        // 1️⃣ CHECK PREVIOUS RESULT 
+        if(state.activePrediction) { 
+            let timeElapsed = Date.now() - state.activePrediction.timestamp;
+            if (timeElapsed > 4 * 60 * 1000) { 
+                state.activePrediction = null; saveState();
                 return;
             }
 
-            const sizes = list.map(i => getSize(Number(i.number))); 
-            const signal = analyzeSize(sizes, state.currentLevel); 
-            
-            if(signal.action !== "WAIT" && signal.conf >= 88) { 
-                let betAmount = FUND_LEVELS[state.currentLevel]; 
-                let threatLevel = state.currentLevel === 0 ? "🟢 𝐒𝐓𝐀𝐍𝐃𝐀𝐑𝐃 𝐄𝐍𝐓𝐑𝐘" : (state.currentLevel === 1 ? "🟡 𝐑𝐄𝐂𝐎𝐕𝐄𝐑𝐘 𝐌𝐎𝐃𝐄" : "🔴 𝐃𝐄𝐄𝐏 𝐑𝐄𝐂𝐎𝐕𝐄𝐑𝐘");
-                let bar = signal.conf >= 92 ? "🟩🟩🟩🟩🟩" : "🟩🟩🟩🟩⬜";
+            if(BigInt(latestIssue) >= BigInt(state.activePrediction.period)) { 
+                const resultItem = list.find(i => i.issueNumber === state.activePrediction.period); 
+                if(resultItem) { 
+                    let actualNum = Number(resultItem.number); 
+                    let actualResult = state.activePrediction.type === "SIZE" ? getSize(actualNum) : getColor(actualNum); 
+                    let isWin = (actualResult === state.activePrediction.pred); 
+                    
+                    if(isWin) { 
+                        state.wins++; 
+                        state.totalSignals++; 
+                        state.currentLevel = 0; 
+                    } else { 
+                        state.currentLevel++; 
+                        if(state.currentLevel >= FUND_LEVELS.length) {
+                            state.totalSignals++; 
+                            state.currentLevel = 0; 
+                            await sendTelegram(`🛑 <b>𝐌𝐀𝐗 𝐋𝐄𝐕𝐄𝐋 𝐑𝐄𝐀𝐂𝐇𝐄𝐃</b> 🛑\n⚠️ AI detected massive anomaly. Resetting.`);
+                        }
+                    } 
+                    
+                    let currentAccuracy = state.totalSignals > 0 ? Math.round((state.wins / state.totalSignals) * 100) : 100; 
+                    
+                    let resMsg = isWin ? `✅ <b>𝐀𝐈 𝐓𝐀𝐑𝐆𝐄𝐓 𝐄𝐋𝐈𝐌𝐈𝐍𝐀𝐓𝐄𝐃</b> ✅\n` : `❌ <b>𝐀𝐈 𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> ❌\n`; 
+                    resMsg += `⟡ ════════ ⋆★⋆ ════════ ⟡\n`; 
+                    resMsg += `🎯 <b>𝐏𝐞𝐫𝐢𝐨𝐝 :</b> <code>${state.activePrediction.period.slice(-4)}</code>\n`; 
+                    resMsg += `🎲 <b>𝐑𝐞𝐬𝐮𝐥𝐭 :</b> ${actualNum} (${actualResult})\n`; 
+                    
+                    if(isWin) {
+                        resMsg += `💎 <b>𝐏𝐫𝐨𝐟𝐢𝐭 :</b> 𝐒𝐄𝐂𝐔𝐑𝐄𝐃\n`; 
+                    } else {
+                        resMsg += `🛡️ <b>𝐒𝐭𝐚𝐭𝐮𝐬 :</b> 𝐄𝐒𝐂𝐀𝐋𝐀𝐓𝐈𝐍𝐆 (𝐋𝐞𝐯𝐞𝐥 ${state.currentLevel + 1})\n`; 
+                    }
+                    resMsg += `📊 <b>𝐀𝐈 𝐀𝐜𝐜𝐮𝐫𝐚𝐜𝐲:</b> ${currentAccuracy}%\n`;
+                    resMsg += `⟡ ════════ ⋆★⋆ ════════ ⟡\n`; 
+                    
+                    await sendTelegram(resMsg); 
+                } 
+                state.activePrediction = null; saveState(); 
+            } 
+        } 
+        
+        // 2️⃣ GENERATE NEW PREDICTION USING GEMINI
+        if(state.lastProcessedIssue !== latestIssue) { 
+            if(!state.activePrediction) { 
 
-                let msg = `⚡️ 𝐊𝐈𝐑𝐀 𝐐𝐔𝐀𝐍𝐓𝐔𝐌 𝐕𝟑𝟒.𝟒 𝐄𝐋𝐈𝐓𝐄 ⚡️\n`; 
-                msg += `━━━━━━━━━━━━━━━━━━\n`; 
-                msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>` + targetIssue.slice(-4) + `</code>\n`; 
-                msg += `📏 <b>𝐒𝐢𝐠𝐧𝐚𝐥 𝐓𝐲𝐩𝐞:</b> ` + signal.type + `\n`; 
-                msg += `🔮 <b>𝐏𝐫𝐞𝐝𝐢𝐜𝐭𝐢𝐨𝐧: ` + signal.action + `</b>\n`; 
-                msg += `📊 𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞: ` + bar + ` <b>` + signal.conf + `%</b>\n`; 
-                msg += `━━━━━━━━━━━━━━━━━━\n`; 
-                msg += `⚠️ <b>` + threatLevel + `</b>\n`; 
-                msg += `💰 <b>𝐈𝐧𝐯𝐞𝐬𝐭𝐦𝐞𝐧𝐭 (𝐋` + (state.currentLevel + 1) + `): Rs. ` + betAmount + `</b>\n`; 
-                msg += `🧠 <i>` + signal.reason + `</i>`; 
+                // Send data to Gemini API
+                const signal = await getAIPrediction(list);
                 
-                await sendTelegram(msg); 
-                state.activePrediction = { period: targetIssue, pred: signal.action, type: signal.type, conf: signal.conf, timestamp: Date.now() }; 
-                saveState(); 
-            }
+                if(signal && signal.action === "WAIT") { 
+                    let msg = `📡 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐍𝐄𝐔𝐑𝐀𝐋 𝐒𝐂𝐀𝐍</b> 📡\n`; 
+                    msg += `⟡ ═════ ⋆★⋆ ═════ ⟡\n`; 
+                    msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`; 
+                    msg += `⚠️ <b>𝐀𝐜𝐭𝐢𝐨𝐧:</b> WAIT\n`; 
+                    msg += `🧠 <b>𝐀𝐈 𝐋𝐨𝐠𝐢𝐜:</b> <i>${signal.reason}</i>`;
+                    await sendTelegram(msg); 
+                    saveState();
+                } else if(signal && signal.action !== "WAIT") { 
+                    let signalEmoji = signal.type === "COLOR" ? "🎨" : "📏"; 
+                    let betAmount = FUND_LEVELS[state.currentLevel]; 
+
+                    let bar = "🟩🟩🟩🟩🟩";
+                    if (signal.confidence < 92) bar = "🟩🟩🟩🟩⬜";
+                    
+                    let msg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 : 𝐀𝐍𝐀𝐋𝐘𝐒𝐈𝐒</b> 🤖\n`; 
+                    msg += `⟡ ════════ ⋆★⋆ ════════ ⟡\n`; 
+                    msg += `🎯 <b>𝐓𝐚𝐫𝐠𝐞𝐭 𝐏𝐞𝐫𝐢𝐨𝐝 :</b> <code>${targetIssue.slice(-4)}</code>\n`; 
+                    msg += `🔍 <b>𝐀𝐧𝐨𝐦𝐚𝐥𝐲 𝐓𝐲𝐩𝐞 :</b> ${signalEmoji} ${signal.type}\n`; 
+                    msg += `🔮 <b>𝐀𝐈 𝐏𝐫𝐞𝐝𝐢𝐜𝐭𝐢𝐨𝐧 : ${signal.action}</b>\n`; 
+                    msg += `📊 <b>𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞    :</b> ${bar} <b>${signal.confidence}%</b>\n`; 
+                    msg += `⟡ ════════ ⋆★⋆ ════════ ⟡\n`; 
+                    msg += `💎 <b>𝐄𝐧𝐭𝐫𝐲 𝐋𝐞𝐯𝐞𝐥  :</b> Level ${state.currentLevel + 1}\n`; 
+                    msg += `💰 <b>𝐈𝐧𝐯𝐞𝐬𝐭𝐦𝐞𝐧𝐭   :</b> Rs. ${betAmount}\n`; 
+                    msg += `🧠 <b>𝐀𝐈 𝐑𝐞𝐚𝐬𝐨𝐧𝐢𝐧𝐠 :</b> <i>${signal.reason}</i>`; 
+                    
+                    await sendTelegram(msg); 
+                    state.activePrediction = { period: targetIssue, pred: signal.action, type: signal.type, conf: signal.confidence, timestamp: Date.now() }; 
+                    saveState(); 
+                } 
+            } 
+            state.lastProcessedIssue = latestIssue; saveState(); 
         } 
     } catch (e) {
         console.log(`[API ERROR] ${e.message}`);
