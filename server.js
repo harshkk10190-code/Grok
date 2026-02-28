@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => {
     res.send(`
         <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;">
-            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐋𝐈𝐕𝐄 𝐋𝐎𝐆 𝐌𝐎𝐃𝐄) 🧠</h2>
-            <p>1.5-Flash Active. Check Render Logs for live AI thoughts.</p>
+            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐀𝐍𝐓𝐈-𝐁𝐋𝐎𝐂𝐊) 🧠</h2>
+            <p>Mobile Spoofing Active. API Firewall Bypass Engaged.</p>
         </body>
     `);
 });
@@ -28,11 +28,14 @@ const WINGO_API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssueP
 
 const FUND_LEVELS = [33, 66, 130, 260, 550, 1100]; 
 
+// 🚨 PATCH: Aggressive Mobile Browser Spoofing
 const HEADERS = { 
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)", 
+    "User-Agent": "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36", 
     "Accept": "application/json, text/plain, */*", 
     "Origin": "https://www.dmwin2.com", 
-    "Referer": "https://www.dmwin2.com/" 
+    "Referer": "https://www.dmwin2.com/",
+    "Accept-Language": "en-US,en;q=0.9,hi;q=0.8",
+    "Connection": "keep-alive"
 }; 
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -82,7 +85,7 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Gemini 1.5 Flash Neural Network Linked.</i>\n👁️ <i>Live Admin Terminal Active.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
+    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Gemini 1.5 Flash Neural Network Linked.</i>\n🛡️ <i>Mobile API Spoofing Active.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
@@ -145,8 +148,21 @@ async function tick() {
     
     try { 
         const res = await fetch(WINGO_API + "&_t=" + Date.now(), { headers: HEADERS, timeout: 8000 }); 
-        const data = await res.json(); 
-        if(!data.data || !data.data.list) throw new Error("API Issue"); 
+        
+        // 🚨 PATCH: Read the raw text first to catch the HTML firewall page
+        const rawText = await res.text();
+        let data;
+        
+        try {
+            data = JSON.parse(rawText);
+        } catch (parseError) {
+            // This is where we catch the "<!DOCTYPE html>" error!
+            console.log(`\n[FIREWALL BLOCKED] The casino returned a security page instead of JSON.`);
+            console.log(`[FIREWALL RAW DATA]: ${rawText.substring(0, 200)}...`);
+            throw new Error("Casino Firewall Blocked Connection.");
+        }
+
+        if(!data.data || !data.data.list) throw new Error("Empty API List"); 
         
         const list = data.data.list; 
         const latestIssue = list[0].issueNumber; 
@@ -209,7 +225,6 @@ async function tick() {
 
                 const signal = await getAIPrediction(list);
                 
-                // 🚨 LIVE TERMINAL LOG: Prints to Render so you know it's not frozen
                 console.log(`\n[${new Date().toLocaleTimeString()}] 🎯 Period ${targetIssue.slice(-4)} | AI DECISION:`, signal);
                 
                 if(signal && signal.action === "WAIT") { 
