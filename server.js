@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => {
     res.send(`
         <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;">
-            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐔𝐍𝐑𝐄𝐒𝐓𝐑𝐈𝐂𝐓𝐄𝐃) 🧠</h2>
-            <p>Safety Filters Disabled. Direct Neural Link Active.</p>
+            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐃𝐄𝐁𝐔𝐆 𝐌𝐎𝐃𝐄) 🧠</h2>
+            <p>Safety Filters Disabled. Advanced Error Logging Active.</p>
         </body>
     `);
 });
@@ -83,7 +83,7 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Unrestricted Neural Network Linked.</i>\n🔓 <i>Safety Filters Bypassed.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
+    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Unrestricted Neural Network Linked.</i>\n🔓 <i>Deep Error Logging Bypassed.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
@@ -115,23 +115,22 @@ async function getAIPrediction(historyList) {
         {"type": "SIZE or COLOR or NONE", "action": "BIG or SMALL or RED or GREEN or WAIT", "confidence": 95, "reason": "Short 5 word reason"}
         `;
 
-        // Apply the bypassed safety settings to the model
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", safetySettings });
         const result = await model.generateContent(prompt);
         let aiText = result.response.text().trim();
         
-        // Aggressive JSON Extraction
         const jsonMatch = aiText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
             return JSON.parse(jsonMatch[0]);
         } else {
-            throw new Error("Invalid Output Format");
+            throw new Error("Invalid Output Format from AI");
         }
 
     } catch (error) {
         console.log("Gemini AI Error:", error.message);
-        // Updated error message so we know if it's still breaking
-        return { type: "NONE", action: "WAIT", confidence: 0, reason: `Error: ${error.message.substring(0, 30)}...` };
+        // 🚨 THIS IS THE FIX: Grabbing the FULL error message to diagnose the crash
+        let cleanError = error.message.replace(/[\n\r]/g, " ").substring(0, 150); 
+        return { type: "NONE", action: "WAIT", confidence: 0, reason: `ERR: ${cleanError}` };
     }
 }
 
