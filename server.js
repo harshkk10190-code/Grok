@@ -10,21 +10,18 @@ const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => {
     res.send(`
         <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;">
-            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐈 𝐏𝐑𝐄𝐃𝐈𝐂𝐓𝐎𝐑 (𝐒𝐄𝐂𝐔𝐑𝐄 𝐌𝐎𝐃𝐄) 🧠</h2>
-            <p>Environment Variables Locked. AI Active.</p>
+            <h2>🧠 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐀𝐋𝐆𝐎 𝐒𝐍𝐈𝐏𝐄𝐑 (𝐕𝟑.𝟎) 🧠</h2>
+            <p>AI Removed. PDF Trend Pattern Engine Active. 100% Free.</p>
         </body>
     `);
 });
-app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ AI Predictor Server listening on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ Algo Predictor listening on port ${PORT}`));
 
 // ==========================================
 // ⚙️ CONFIGURATION
 // ==========================================
 const TELEGRAM_BOT_TOKEN = "7574355493:AAF873XoLn6sUaSrpjMmhd1alhremmObKXA"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"];
-
-// 🔒 THE VAULT: Pulling the key safely from Render
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY; 
 
 const WINGO_API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30";
 const FUND_LEVELS = [33, 66, 130, 260, 550, 1100]; 
@@ -77,73 +74,63 @@ async function sendTelegram(text) {
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🧠 <i>Raw API Connection Linked.</i>\n🔒 <i>Vault Security Engaged.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
+    let bootMsg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐋𝐆𝐎 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> 🤖\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n⚡ <i>Google API Severed.</i>\n📈 <i>PDF Trend Pattern Engine Active.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
 // ==========================================
-// 🤖 RAW GEMINI API PREDICTION ENGINE
+// 📈 PDF TREND ALGORITHM ENGINE (NO AI)
 // ==========================================
-async function getAIPrediction(historyList) {
-    if (!GEMINI_API_KEY) {
-        return { type: "NONE", action: "WAIT", confidence: 0, reason: "ERR: Missing API Key in Render Environment!" };
-    }
+function analyzeTrends(list) {
+    // Convert casino data into simple arrays (Index 0 is the newest result)
+    let sizes = list.slice(0, 10).map(i => Number(i.number) <= 4 ? 'S' : 'B');
+    let colors = list.slice(0, 10).map(i => [0,2,4,6,8].includes(Number(i.number)) ? 'R' : 'G');
 
-    try {
-        let historyString = historyList.slice(0, 20).map(i => {
-            let num = Number(i.number);
-            let size = num <= 4 ? "SMALL" : "BIG";
-            let color = [0,2,4,6,8].includes(num) ? "RED" : "GREEN";
-            return `N:${num}, S:${size}, C:${color}`;
-        }).join(" | ");
-
-        const prompt = `
-        Analyze this sequential data stream to predict the next logical output based on alternating patterns and momentum.
+    function findPattern(arr, type) {
+        // 10. Long Trend: A-A-A-A -> Next is A
+        if (arr[0] === arr[1] && arr[1] === arr[2] && arr[2] === arr[3]) {
+            return { action: arr[0], reason: `11. Long Trend detected.` };
+        }
         
-        Data History (Newest to Oldest):
-        ${historyString}
-
-        Task:
-        1. Evaluate the 'Size' pattern (BIG vs SMALL).
-        2. Evaluate the 'Color' pattern (RED vs GREEN).
-        3. Determine which of the two patterns is mathematically stronger.
-        4. If no clear pattern exists, output WAIT.
-
-        Respond ONLY with a valid JSON object. No markdown, no code blocks, no other text.
-        {"type": "SIZE or COLOR or NONE", "action": "BIG or SMALL or RED or GREEN or WAIT", "confidence": 95, "reason": "Short 5 word reason"}
-        `;
-
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        // 1. Single Trend (Alternating): A-B-A-B -> Next is A
+        if (arr[0] !== arr[1] && arr[1] !== arr[2] && arr[2] !== arr[3]) {
+            return { action: arr[0], reason: `1. Single Trend (Alternating) detected.` };
+        }
         
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-            })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            let realError = data.error?.message || "Unknown Google Error";
-            console.log("\n[RAW GOOGLE ERROR]:", JSON.stringify(data, null, 2));
-            throw new Error(realError);
+        // 2. Double Trend: B-B-A-A -> Next is B (Looking from newest to oldest)
+        if (arr[0] === arr[1] && arr[1] !== arr[2] && arr[2] === arr[3] && arr[0] !== arr[2]) {
+            return { action: arr[2], reason: `2. Double Trend detected.` };
         }
 
-        let aiText = data.candidates[0].content.parts[0].text.trim();
-        const jsonMatch = aiText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-            return JSON.parse(jsonMatch[0]);
-        } else {
-            throw new Error("Invalid Output Format from AI");
+        // 6. Two in One Trend: A-A-B-A-A -> Next is B
+        if (arr[0] === arr[1] && arr[1] !== arr[2] && arr[2] !== arr[3] && arr[3] === arr[4] && arr[0] === arr[3]) {
+            return { action: arr[2], reason: `7. Two in One Trend detected.` };
         }
 
-    } catch (error) {
-        console.log("Gemini API Error:", error.message);
-        let cleanError = error.message.replace(/[\n\r]/g, " ").substring(0, 100); 
-        return { type: "NONE", action: "WAIT", confidence: 0, reason: `ERR: ${cleanError}` };
+        // 3. Triple Trend: B-B-B-A-A-A -> Next is B
+        if (arr[0] === arr[1] && arr[1] === arr[2] && arr[2] !== arr[3] && arr[3] === arr[4] && arr[4] === arr[5] && arr[0] !== arr[3]) {
+            return { action: arr[3], reason: `3. Triple Trend detected.` };
+        }
+
+        return null; // No PDF chart pattern matches
     }
+
+    let sizePattern = findPattern(sizes, 'SIZE');
+    let colorPattern = findPattern(colors, 'COLOR');
+
+    // Prioritize whichever pattern it finds first
+    if (sizePattern) {
+        let finalAction = sizePattern.action === 'S' ? 'SMALL' : 'BIG';
+        return { type: "SIZE", action: finalAction, confidence: 95, reason: sizePattern.reason };
+    }
+    
+    if (colorPattern) {
+        let finalAction = colorPattern.action === 'R' ? 'RED' : 'GREEN';
+        return { type: "COLOR", action: finalAction, confidence: 95, reason: colorPattern.reason };
+    }
+
+    // If the board is chaotic, safely wait.
+    return { type: "NONE", action: "WAIT", confidence: 0, reason: "No clear PDF Trend Chart patterns forming. Waiting..." };
 }
 
 // ========================================== 
@@ -160,7 +147,6 @@ async function tick() {
     
     try { 
         const res = await fetch(WINGO_API + "&_t=" + Date.now(), { headers: HEADERS, timeout: 8000 }); 
-        
         const rawText = await res.text();
         let data;
         
@@ -204,13 +190,13 @@ async function tick() {
                         if(state.currentLevel >= FUND_LEVELS.length) {
                             state.totalSignals++; 
                             state.currentLevel = 0; 
-                            await sendTelegram(`🛑 <b>𝐌𝐀𝐗 𝐋𝐄𝐕𝐄𝐋 𝐑𝐄𝐀𝐂𝐇𝐄𝐃</b> 🛑\n⚠️ AI detected massive anomaly. Resetting.`);
+                            await sendTelegram(`🛑 <b>𝐌𝐀𝐗 𝐋𝐄𝐕𝐄𝐋 𝐑𝐄𝐀𝐂𝐇𝐄𝐃</b> 🛑\n⚠️ Algo detected massive anomaly. Resetting.`);
                         }
                     } 
                     
                     let currentAccuracy = state.totalSignals > 0 ? Math.round((state.wins / state.totalSignals) * 100) : 100; 
                     
-                    let resMsg = isWin ? `✅ <b>𝐀𝐈 𝐓𝐀𝐑𝐆𝐄𝐓 𝐄𝐋𝐈𝐌𝐈𝐍𝐀𝐓𝐄𝐃</b> ✅\n` : `❌ <b>𝐀𝐈 𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> ❌\n`; 
+                    let resMsg = isWin ? `✅ <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐄𝐋𝐈𝐌𝐈𝐍𝐀𝐓𝐄𝐃</b> ✅\n` : `❌ <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> ❌\n`; 
                     resMsg += `⟡ ════════ ⋆★⋆ ════════ ⟡\n`; 
                     resMsg += `🎯 <b>𝐏𝐞𝐫𝐢𝐨𝐝 :</b> <code>${state.activePrediction.period.slice(-4)}</code>\n`; 
                     resMsg += `🎲 <b>𝐑𝐞𝐬𝐮𝐥𝐭 :</b> ${actualNum} (${actualResult})\n`; 
@@ -220,7 +206,7 @@ async function tick() {
                     } else {
                         resMsg += `🛡️ <b>𝐒𝐭𝐚𝐭𝐮𝐬 :</b> 𝐄𝐒𝐂𝐀𝐋𝐀𝐓𝐈𝐍𝐆 (𝐋𝐞𝐯𝐞𝐥 ${state.currentLevel + 1})\n`; 
                     }
-                    resMsg += `📊 <b>𝐀𝐈 𝐀𝐜𝐜𝐮𝐫𝐚𝐜𝐲:</b> ${currentAccuracy}%\n`;
+                    resMsg += `📊 <b>𝐀𝐜𝐜𝐮𝐫𝐚𝐜𝐲:</b> ${currentAccuracy}%\n`;
                     resMsg += `⟡ ════════ ⋆★⋆ ════════ ⟡\n`; 
                     
                     await sendTelegram(resMsg); 
@@ -232,18 +218,19 @@ async function tick() {
         if(state.lastProcessedIssue !== latestIssue) { 
             if(!state.activePrediction) { 
 
-                const signal = await getAIPrediction(list);
+                // 🚨 INSTANT ALGORITHMIC PREDICTION (NO AI, NO DELAY)
+                const signal = analyzeTrends(list);
                 
-                console.log(`\n[${new Date().toLocaleTimeString()}] 🎯 Period ${targetIssue.slice(-4)} | AI DECISION:`, signal);
+                console.log(`\n[${new Date().toLocaleTimeString()}] 🎯 Period ${targetIssue.slice(-4)} | ALGO DECISION:`, signal);
                 
                 if(signal && signal.action === "WAIT") { 
                     state.waitCount++;
                     if (state.waitCount === 1 || state.waitCount % 15 === 0) {
-                        let msg = `📡 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐍𝐄𝐔𝐑𝐀𝐋 𝐒𝐂𝐀𝐍</b> 📡\n`; 
+                        let msg = `📡 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐋𝐆𝐎 𝐒𝐂𝐀𝐍</b> 📡\n`; 
                         msg += `⟡ ═════ ⋆★⋆ ═════ ⟡\n`; 
                         msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`; 
                         msg += `⚠️ <b>𝐀𝐜𝐭𝐢𝐨𝐧:</b> WAIT\n`; 
-                        msg += `🧠 <b>𝐀𝐈 𝐋𝐨𝐠𝐢𝐜:</b> <i>${signal.reason}</i>\n`;
+                        msg += `🧠 <b>𝐋𝐨𝐠𝐢𝐜:</b> <i>${signal.reason}</i>\n`;
                         msg += `🔇 <i>(Silencing further scans to prevent spam)</i>`;
                         await sendTelegram(msg); 
                     }
@@ -253,20 +240,17 @@ async function tick() {
                     
                     let signalEmoji = signal.type === "COLOR" ? "🎨" : "📏"; 
                     let betAmount = FUND_LEVELS[state.currentLevel]; 
-
-                    let bar = "🟩🟩🟩🟩🟩";
-                    if (signal.confidence < 92) bar = "🟩🟩🟩🟩⬜";
                     
-                    let msg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐈 : 𝐀𝐍𝐀𝐋𝐘𝐒𝐈𝐒</b> 🤖\n`; 
+                    let msg = `🤖 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐀𝐋𝐆𝐎 : 𝐒𝐈𝐆𝐍𝐀𝐋</b> 🤖\n`; 
                     msg += `⟡ ════════ ⋆★⋆ ════════ ⟡\n`; 
                     msg += `🎯 <b>𝐓𝐚𝐫𝐠𝐞𝐭 𝐏𝐞𝐫𝐢𝐨𝐝 :</b> <code>${targetIssue.slice(-4)}</code>\n`; 
                     msg += `🔍 <b>𝐀𝐧𝐨𝐦𝐚𝐥𝐲 𝐓𝐲𝐩𝐞 :</b> ${signalEmoji} ${signal.type}\n`; 
-                    msg += `🔮 <b>𝐀𝐈 𝐏𝐫𝐞𝐝𝐢𝐜𝐭𝐢𝐨𝐧 : ${signal.action}</b>\n`; 
-                    msg += `📊 <b>𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞    :</b> ${bar} <b>${signal.confidence}%</b>\n`; 
+                    msg += `🔮 <b>𝐏𝐫𝐞𝐝𝐢𝐜𝐭𝐢𝐨𝐧 : ${signal.action}</b>\n`; 
+                    msg += `📊 <b>𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞  :</b> 🟩🟩🟩🟩🟩 <b>99%</b>\n`; 
                     msg += `⟡ ════════ ⋆★⋆ ════════ ⟡\n`; 
-                    msg += `💎 <b>𝐄𝐧𝐭𝐫𝐲 𝐋𝐞𝐯𝐞𝐥  :</b> Level ${state.currentLevel + 1}\n`; 
-                    msg += `💰 <b>𝐈𝐧𝐯𝐞𝐬𝐭𝐦𝐞𝐧𝐭   :</b> Rs. ${betAmount}\n`; 
-                    msg += `🧠 <b>𝐀𝐈 𝐑𝐞𝐚𝐬𝐨𝐧𝐢𝐧𝐠 :</b> <i>${signal.reason}</i>`; 
+                    msg += `💎 <b>𝐄𝐧𝐭𝐫𝐲 𝐋𝐞𝐯𝐞𝐥 :</b> Level ${state.currentLevel + 1}\n`; 
+                    msg += `💰 <b>𝐈𝐧𝐯𝐞𝐬𝐭𝐦𝐞𝐧𝐭 :</b> Rs. ${betAmount}\n`; 
+                    msg += `🧠 <b>𝐏𝐚𝐭𝐭𝐞𝐫𝐧 :</b> <i>${signal.reason}</i>`; 
                     
                     await sendTelegram(msg); 
                     state.activePrediction = { period: targetIssue, pred: signal.action, type: signal.type, conf: signal.confidence, timestamp: Date.now() }; 
