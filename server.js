@@ -20,7 +20,7 @@ app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ Algo Predictor listenin
 // ==========================================
 // ⚙️ CONFIGURATION
 // ==========================================
-const TELEGRAM_BOT_TOKEN = "7574355493:AAF873XoLn6sUaSrpjMmhd1alhremmObKXA"; 
+const TELEGRAM_BOT_TOKEN = "7574355493:AAHmnUUj7-MCTtdWEJVfrXBeJ9kmyc2WHcE"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"];
 
 const WINGO_API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30";
