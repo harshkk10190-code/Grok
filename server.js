@@ -10,17 +10,17 @@ const PORT = process.env.PORT || 3000;
 app.get('/', (req, res) => {
     res.send(`
         <body style="background:#050510; color:#00ff9d; font-family:monospace; text-align:center; padding:50px;">
-            <h2>⚙️ 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐐𝐔𝐀𝐍𝐓 𝐀𝐋𝐆𝐎 (𝐕𝟓.𝟎) ⚙️</h2>
-            <p>11/11 PDF Trends Hardcoded. Size Only. Smart UI Active.</p>
+            <h2>🏛️ 𝐉𝐀𝐑𝐕𝐈𝐒 🤖 𝐈𝐍𝐒𝐓𝐈𝐓𝐔𝐓𝐈𝐎𝐍𝐀𝐋 𝐐𝐔𝐀𝐍𝐓 (𝐕𝟔.𝟎) 🏛️</h2>
+            <p>Advanced PDF Trend Engine. Market Health Monitor Active.</p>
         </body>
     `);
 });
-app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ Quant Algo listening on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ V6.0 Quant Algo listening on port ${PORT}`));
 
 // ==========================================
 // ⚙️ CONFIGURATION
 // ==========================================
-const TELEGRAM_BOT_TOKEN = "7574355493:AAHmnUUj7-MCTtdWEJVfrXBeJ9kmyc2WHcE"; 
+const TELEGRAM_BOT_TOKEN = "7574355493:AAHjeaZAvJTme5-3Ttbzoc6FTZh4DFYkwP4"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"];
 
 const WINGO_API = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json?pageNo=1&pageSize=30";
@@ -46,8 +46,14 @@ let state = {
     wins: 0, 
     isStarted: false, 
     currentLevel: 0,
-    waitCount: 0 
-}; 
+    waitCount: 0,
+    skipStreak: 0,
+    cooldownCycles: 0,
+wasOverheated: false,
+recoveryMode: false,
+shockLockIssue: null,
+cooldownLockIssue: null
+};
 
 function loadState() { 
     if (fs.existsSync(STATE_FILE)) { 
@@ -70,59 +76,288 @@ async function sendTelegram(text) {
     } 
 } 
 
+function divider(){
+    return `<pre>⟡ ════════ ⋆★⋆ ════════ ⟡</pre>\n`;
+}
+
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `⚙️ <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐐𝐔𝐀𝐍𝐓 𝐒𝐘𝐒𝐓𝐄𝐌 𝐎𝐍𝐋𝐈𝐍𝐄</b> ⚙️\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🗑️ <i>Cloud Integration Deleted.</i>\n📏 <i>Strict BIG/SMALL Algorithm Active.</i>\n📈 <i>11/11 Master Chart Patterns Loaded.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
+    let bootMsg = `🏛️ <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐕𝟔.𝟎 𝐈𝐍𝐒𝐓𝐈𝐓𝐔𝐓𝐈𝐎𝐍𝐀𝐋</b> 🏛️\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🛡️ <i>Market Health Monitor Active.</i>\n📏 <i>Size-Only Quantitative Logic Loaded.</i>\n📈 <i>11/11 Master Trends Calibrated.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
 // ==========================================
-// 📈 SMART 11-PATTERN ALGORITHM (STRICT STRING MATCHING)
+// 📊 MARKET HEALTH MONITOR
 // ==========================================
-function analyzeTrends(list) {
-    // 1. Convert sizes into a timeline string (Oldest -> Newest)
-    let sizesArray = list.slice(0, 15).map(i => Number(i.number) <= 4 ? 'S' : 'B');
-    let history = sizesArray.reverse().join(''); 
+function getMarketHealth() {
+    if (state.currentLevel === 0 || state.currentLevel === 1) return "STABLE ♻️";
+    if (state.currentLevel === 2 || state.currentLevel === 3) return "VOLATILE 🌕";
+    return "DANGEROUS 🩸";
+}
 
-    // 2. Scan from Longest Complex Patterns (Length 9) down to Shortest (Length 4)
-    
-    // Length 9 Patterns
-    if (history.endsWith('SSSSBBSSS')) return { action: 'SMALL', reason: '10. Four in Two Trend' };
-    if (history.endsWith('BBBBSSBBB')) return { action: 'BIG', reason: '10. Four in Two Trend' };
+function getHeatMeter(){
 
-    // Length 8 Patterns
-    if (history.endsWith('BBBBSBBB')) return { action: 'BIG', reason: '9. Four in One Trend' };
-    if (history.endsWith('SSSSBSSS')) return { action: 'SMALL', reason: '9. Four in One Trend' };
+    let heat = 0;
 
-    // Length 7 Patterns
-    if (history.endsWith('SSSBBSS')) return { action: 'SMALL', reason: '8. Three in Two Trend' };
-    if (history.endsWith('BBBSSBB')) return { action: 'BIG', reason: '8. Three in Two Trend' };
-    if (history.endsWith('BBBBSSS')) return { action: 'SMALL', reason: '5. Quadra Trend' };
-    if (history.endsWith('SSSSBBB')) return { action: 'BIG', reason: '5. Quadra Trend' };
+    // Loss escalation increases heat
+    heat += state.currentLevel * 1.5;
 
-    // Length 6 Patterns
-    if (history.endsWith('SSSBSS')) return { action: 'SMALL', reason: '6. Three in One Trend' };
-    if (history.endsWith('BBBSBB')) return { action: 'BIG', reason: '6. Three in One Trend' };
-    if (history.endsWith('BBSSBB')) return { action: 'SMALL', reason: '2. Double Trend (Extended)' };
-    if (history.endsWith('SSBBSS')) return { action: 'BIG', reason: '2. Double Trend (Extended)' };
+    // Waiting cools heat
+    heat -= Math.min(state.waitCount, 3);
 
-    // Length 5 Patterns
-    if (history.endsWith('BBSBB')) return { action: 'SMALL', reason: '7. Two in One Trend' };
-    if (history.endsWith('SSBSS')) return { action: 'BIG', reason: '7. Two in One Trend' };
-    if (history.endsWith('SSSBB')) return { action: 'BIG', reason: '3. Triple Trend' };
-    if (history.endsWith('BBBSS')) return { action: 'SMALL', reason: '3. Triple Trend' };
-    if (history.endsWith('BBBBB')) return { action: 'BIG', reason: '11. Long Trend (Dragon)' };
-    if (history.endsWith('SSSSS')) return { action: 'SMALL', reason: '11. Long Trend (Dragon)' };
+    // Clamp
+    heat = Math.max(0, Math.min(5, Math.round(heat)));
 
-    // Length 4 Patterns
-    if (history.endsWith('BSBS')) return { action: 'BIG', reason: '1. Single Trend (Alternating)' };
-    if (history.endsWith('SBSB')) return { action: 'SMALL', reason: '1. Single Trend (Alternating)' };
-    if (history.endsWith('BBSS')) return { action: 'BIG', reason: '2. Double Trend' };
-    if (history.endsWith('SSBB')) return { action: 'SMALL', reason: '2. Double Trend' };
+    const bars = "█".repeat(heat) + "░".repeat(5 - heat);
 
-    // SMART SKIP: If the board is messy and doesn't perfectly match the above, WAIT.
-    return { action: "WAIT", reason: "Market structure chaotic. Waiting for clear PDF pattern." };
+    let label = "Calm";
+
+    if(heat >= 4) label = "Overheated";
+    else if(heat >= 2) label = "Trend Building";
+
+    // ==========================
+    // 🔥 HEAT MEMORY TRACKING
+    // ==========================
+    if(label === "Overheated"){
+        state.wasOverheated = true;
+        state.cooldownCycles = 0;
+    }
+
+    if(state.wasOverheated && label !== "Overheated"){
+        state.cooldownCycles++;
+    }
+
+    return {
+        bars,
+        label
+    };
+}
+
+function heatLock(){
+
+    const heat = getHeatMeter();
+
+    if(heat.label === "Overheated"){
+        return {
+            blocked: true,
+            reason: "Heat Lock Active"
+        };
+    }
+
+    return { blocked:false };
+}
+
+function cooldownGate(){
+
+    const heat = getHeatMeter();
+
+    if(state.wasOverheated){
+
+        if(state.cooldownCycles < 2){
+            return {
+                blocked:true,
+                reason:"Cooldown Stabilizing"
+            };
+        }
+
+        state.wasOverheated = false;
+        state.cooldownCycles = 0;
+    }
+
+    return { blocked:false };
+}
+
+function shockTrap(list){
+
+    let sizes = list.slice(0,6).map(i => Number(i.number) <= 4 ? 'S' : 'B');
+
+    let last = sizes[0];
+    let prevStreak = 1;
+
+    for(let i=1;i<5;i++){
+        if(sizes[i] === sizes[i+1]) prevStreak++;
+        else break;
+    }
+
+    const heat = getHeatMeter();
+
+    // FAKE BREAKOUT CONDITIONS
+
+    // Calm market but sudden spike
+    if(heat.label === "Calm" && prevStreak >= 4){
+        if(sizes[0] !== sizes[1]){
+            return { trapped:true, reason:"Sudden Spike After Calm" };
+        }
+    }
+
+    // Overheated market reversal spike
+    if(heat.label === "Overheated" && sizes[0] !== sizes[1]){
+        return { trapped:true, reason:"Heat Reversal Trap" };
+    }
+
+    return { trapped:false };
+}
+
+function getConfidence(patternLength, regime, gravityAligned){
+
+    let score = 50;
+
+    if(patternLength >= 5) score += 20;
+    else if(patternLength >= 4) score += 10;
+
+    if(regime === "TREND") score += 20;
+if(regime === "STABLE") score += 5;
+    if(regime === "CHOP") score -= 25;
+
+    if(gravityAligned) score += 10;
+
+    return Math.max(40, Math.min(95, score));
+}
+
+function regimeShield(list){
+
+    let sizes = list.slice(0, 12).map(i => Number(i.number) <= 4 ? 'S' : 'B');
+
+    // -------- FLIP DENSITY --------
+    let flips = 0;
+    for(let i=0;i<10;i++){
+        if(sizes[i] !== sizes[i+1]) flips++;
+    }
+
+    // -------- ALT DETECTION --------
+    let altCount = 0;
+    for(let i=0;i<8;i++){
+        if(sizes[i] !== sizes[i+1] && sizes[i+1] !== sizes[i+2]) altCount++;
+    }
+
+    // -------- MOMENTUM CHECK --------
+    let streak = 1;
+    for(let i=1;i<6;i++){
+        if(sizes[i] === sizes[0]) streak++;
+        else break;
+    }
+
+    // -------- EXPANSION CHECK --------
+    let expansion = false;
+    if(
+        sizes.slice(0,5).join('') === 'BBBBS' ||
+        sizes.slice(0,5).join('') === 'SSSSB'
+    ){
+        expansion = true;
+    }
+
+    // -------- DECISION --------
+    if(flips >= 6){
+        return { tradable:false, reason:"Flip Storm" };
+    }
+
+    if(altCount >= 4){
+        return { tradable:false, reason:"Alternation Trap" };
+    }
+
+    if(expansion){
+        return { tradable:false, reason:"Expansion Chaos" };
+    }
+
+    if(streak >= 5){
+        return { tradable:true, reason:"Strong Trend" };
+    }
+
+    return { tradable:true, reason:"Stable Flow" };
+}
+
+function survivalReset(regime, confidence){
+
+    if(regime === "CHOP" && state.currentLevel >= 2){
+    state.currentLevel = 0;
+    sendTelegram("🛡️ <b>SURVIVAL RESET</b> – Chop detected. Level cleared.");
+    return true;
+}
+
+    if(confidence < 55 && state.currentLevel >= 1){
+        state.currentLevel = 0;
+        return true;
+    }
+
+    return false;
+}
+
+// ==========================================
+// 📈 SMART 11-PATTERN ALGORITHM (V6.0 DEEP SCAN)
+// ==========================================
+
+function analyzeTrendsV7(list){
+
+    const regime = regimeShield(list);
+
+    if(!regime.tradable){
+        return {
+            action:"WAIT",
+            regime:"CHOP",
+            confidence:0,
+            reason:`Regime Shield: ${regime.reason}`
+        };
+    }
+
+    let sizes = list.slice(0, 10).map(i => Number(i.number) <= 4 ? 'S' : 'B');
+
+    let forward = sizes.join('');
+    let reverse = sizes.slice().reverse().join('');
+
+    const match = (p)=> forward.endsWith(p) || reverse.endsWith(p);
+
+    let small=0,big=0;
+    for(let i=0;i<5;i++){
+        let n = Number(list[i].number);
+        if(n<=4) small++; else big++;
+    }
+
+    let gravity = small>big?'S':'B';
+
+    let decision = null;
+    let length = 0;
+
+    if(match('SSSBB')) { decision='BIG'; length=5; }
+    else if(match('BBBSS')) { decision='SMALL'; length=5; }
+    else if(match('BBSS')) { decision='BIG'; length=4; }
+    else if(match('SSBB')) { decision='SMALL'; length=4; }
+    else if(match('BSBS')) { decision='BIG'; length=4; }
+    else if(match('SBSB')) { decision='SMALL'; length=4; }
+
+    if(!decision){
+    return {
+        action:"WAIT",
+        regime:"MIXED",
+        confidence:0,
+        reason:"No Pattern Alignment"
+    };
+}
+
+    let gravityAligned =
+        (gravity === 'S' && decision === 'SMALL') ||
+        (gravity === 'B' && decision === 'BIG');
+
+    let regimeType;
+
+if(regime.reason === "Strong Trend"){
+    regimeType = "TREND";
+}
+else if(regime.reason === "Stable Flow"){
+    regimeType = "STABLE";
+}
+else{
+    regimeType = "CHOP";
+}
+
+    let confidence = getConfidence(length, regimeType, gravityAligned);
+
+    return {
+        action: decision,
+        regime: regimeType,
+        confidence,
+        reason: `Pattern-${length}`
+    };
 }
 
 // ========================================== 
@@ -173,33 +408,44 @@ async function tick() {
                     let isWin = (actualResult === state.activePrediction.pred); 
                     
                     if(isWin) { 
-                        state.wins++; 
-                        state.totalSignals++; 
-                        state.currentLevel = 0; 
-                    } else { 
-                        state.currentLevel++; 
-                        if(state.currentLevel >= FUND_LEVELS.length) {
-                            state.totalSignals++; 
-                            state.currentLevel = 0; 
-                            await sendTelegram(`🛑 <b>𝐌𝐀𝐗 𝐋𝐄𝐕𝐄𝐋 𝐑𝐄𝐀𝐂𝐇𝐄𝐃</b> 🛑\n⚠️ Algorithm detected massive anomaly. Resetting.`);
-                        }
-                    } 
+    state.wins++; 
+    state.totalSignals++; 
+    state.currentLevel = 0; 
+} else { 
+    state.currentLevel++; 
+
+    if(state.currentLevel >= FUND_LEVELS.length - 1){
+
+        state.totalSignals++;
+        state.currentLevel = Math.floor(FUND_LEVELS.length / 2);
+        state.recoveryMode = true;
+        state.wasOverheated = true;
+        state.cooldownCycles = 0;
+
+        await sendTelegram(`🛡️ <b>RECOVERY MODE ACTIVATED</b>
+Post-loss survival engaged.
+Cooling before next entry.`);
+    }
+
+}  // ✅ THIS WAS MISSING
                     
                     let currentAccuracy = state.totalSignals > 0 ? Math.round((state.wins / state.totalSignals) * 100) : 100; 
+                    let marketHealth = getMarketHealth();
+                    const heat = getHeatMeter();
                     
-                    // 🎨 SMART UI UPDATE
-                    let resMsg = isWin ? `✅ <b>𝐀𝐋𝐆𝐎 𝐓𝐀𝐑𝐆𝐄𝐓 𝐄𝐋𝐈𝐌𝐈𝐍𝐀𝐓𝐄𝐃</b> ✅\n` : `🛑 <b>𝐀𝐋𝐆𝐎 𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> 🛑\n`; 
-                    resMsg += `⟡ ════════ ⋆★⋆ ════════ ⟡\n`; 
+                    // 🏛️ V6.0 TERMINAL UI UPDATE
+                    let resMsg = isWin ? `✅ <b>𝐏𝐑𝐎𝐅𝐈𝐓 𝐒𝐄𝐂𝐔𝐑𝐄𝐃</b> ✅\n` : `🛑 <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> 🛑\n`; 
+                    resMsg += divider(); 
                     resMsg += `🎯 <b>𝐏𝐞𝐫𝐢𝐨𝐝 :</b> <code>${state.activePrediction.period.slice(-4)}</code>\n`; 
                     resMsg += `🎲 <b>𝐑𝐞𝐬𝐮𝐥𝐭 :</b> ${actualNum} (${actualResult})\n`; 
+                    resMsg += `📈 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐥𝐭𝐡 :</b> ${marketHealth}\n`;
+                    resMsg += `🔥 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐭 :</b> ${heat.bars} (${heat.label})\n`;
                     
-                    if(isWin) {
-                        resMsg += `💎 <b>𝐏𝐫𝐨𝐟𝐢𝐭 :</b> 𝐒𝐄𝐂𝐔𝐑𝐄𝐃\n`; 
-                    } else {
+                    if(!isWin) {
                         resMsg += `🛡️ <b>𝐒𝐭𝐚𝐭𝐮𝐬 :</b> 𝐄𝐒𝐂𝐀𝐋𝐀𝐓𝐈𝐍𝐆 (𝐋𝐞𝐯𝐞𝐥 ${state.currentLevel + 1})\n`; 
                     }
-                    resMsg += `📊 <b>𝐀𝐜𝐜𝐮𝐫𝐚𝐜𝐲:</b> ${currentAccuracy}%\n`;
-                    resMsg += `⟡ ════════ ⋆★⋆ ════════ ⟡\n`; 
+                    resMsg += `🏆 <b>𝐖𝐢𝐧 𝐑𝐚𝐭𝐞 :</b> ${currentAccuracy}%\n`;
+                    resMsg += divider(); 
                     
                     await sendTelegram(resMsg); 
                 } 
@@ -207,48 +453,167 @@ async function tick() {
             } 
         } 
         
-        if(state.lastProcessedIssue !== latestIssue) { 
-            if(!state.activePrediction) { 
+        if(state.lastProcessedIssue !== latestIssue) {
 
-                const signal = analyzeTrends(list);
+
+    if(!state.activePrediction) {
+
+    const signal = analyzeTrendsV7(list);
+
+// ❄️ COOLDOWN MODE
+const coolBlock = cooldownGate();
+
+if(coolBlock.blocked){
+
+    if(state.cooldownLockIssue !== latestIssue){
+        state.cooldownLockIssue = latestIssue;
+
+        let msg = `❄️ <b>COOLDOWN MODE ACTIVE</b> ❄️\n`;
+        msg += divider();
+        msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
+        msg += `🛡️ <b>Post-Heat Recovery</b>\n`;
+        msg += `📉 <i>Waiting for stable flow before entry</i>`;
+        msg += divider();
+
+        await sendTelegram(msg);
+    }
+
+    state.waitCount++;
+    saveState();
+    return;
+}
+
+// ⚡ V7.6 SHOCK TRAP
+const shock = shockTrap(list);
+
+if(shock.trapped){
+
+    if(state.shockLockIssue !== latestIssue){
+    state.shockLockIssue = latestIssue;
+
+        let msg = `⚡ <b>SHOCK TRAP DETECTED</b> ⚡\n`;
+        msg += divider();
+        msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
+        msg += `🛑 <b>Fake Breakout Blocked</b>\n`;
+        msg += `🧠 <i>${shock.reason}</i>`;
+        msg += divider();
+
+        await sendTelegram(msg);
+    }
+
+    state.waitCount++;
+    saveState();
+    return;
+}
+
+if(signal.action !== "WAIT"){
+
+    if(survivalReset(signal.regime, signal.confidence)){
+        console.log("🛡️ Survival Reset Triggered");
+    }
+
+    if(signal.regime === "CHOP"){
+        state.skipStreak++;
+        if(state.skipStreak < 3){
+            return;
+        }
+    } else {
+        state.skipStreak = 0;
+    }
+}
+                let marketHealth = getMarketHealth();
+                const heat = getHeatMeter();
                 
                 console.log(`\n[${new Date().toLocaleTimeString()}] 🎯 Period ${targetIssue.slice(-4)} | ALGO DECISION:`, signal);
                 
-                if(signal && signal.action === "WAIT") { 
-                    state.waitCount++;
-                    if (state.waitCount === 1 || state.waitCount % 15 === 0) {
-                        // 🎨 SMART UI UPDATE
-                        let msg = `📡 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐌𝐀𝐑𝐊𝐄𝐓 𝐒𝐂𝐀𝐍</b> 📡\n`; 
-                        msg += `⟡ ═════ ⋆★⋆ ═════ ⟡\n`; 
-                        msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`; 
-                        msg += `⚠️ <b>𝐀𝐜𝐭𝐢𝐨𝐧:</b> SKIP & WAIT\n`; 
-                        msg += `🛡️ <b>𝐀𝐥𝐠𝐨 𝐋𝐨𝐠𝐢𝐜:</b> <i>${signal.reason}</i>\n`;
-                        msg += `🔇 <i>(Silencing further scans to prevent spam)</i>`;
-                        await sendTelegram(msg); 
-                    }
-                    saveState();
-                } else if(signal && signal.action !== "WAIT") { 
-                    state.waitCount = 0; 
-                    let betAmount = FUND_LEVELS[state.currentLevel]; 
+                if(signal && signal.action === "WAIT") {
+
+   
+
+    state.waitCount++;
+
+    if (state.waitCount === 1 || state.waitCount % 15 === 0) {
+
+        let msg = `📡 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐌𝐀𝐑𝐊𝐄𝐓 𝐒𝐂𝐀𝐍</b> 📡\n`;
+        msg += divider();
+        msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
+        msg += `⚠️ <b>𝐀𝐜𝐭𝐢𝐨𝐧:</b> SKIP\n`;
+        msg += `🛡️ <b>𝐑𝐞𝐠𝐢𝐦𝐞:</b> ${signal.regime}\n`;
+        msg += `🔥 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐭 :</b> ${heat.bars} (${heat.label})\n`;
+        msg += `🧠 <b>𝐑𝐞𝐚𝐬𝐨𝐧:</b> <i>${signal.reason}</i>\n`;
+        msg += `🔇 <i>(Silencing further scans to prevent spam)</i>`;
+        msg += divider();
+
+        await sendTelegram(msg);
+    }
+
+    saveState();
+} else if(
+    signal &&
+    signal.action !== "WAIT" &&
+    (
+        // 🔥 Strong Trend Entry
+        (signal.regime === "TREND" && signal.confidence >= 60)
+
+        ||
+
+        // ⚖️ Balanced Mixed Entry
+        (signal.regime === "STABLE" && signal.confidence >= 75)
+    )
+) {
+
+    const heatBlock = heatLock();
+
+    if(heatBlock.blocked){
+
+    state.waitCount++;
+
+    let msg = `🛑 <b>𝐇𝐄𝐀𝐓 𝐋𝐎𝐂𝐊 𝐀𝐂𝐓𝐈𝐕𝐄</b> 🛑\n`;
+    msg += divider();
+    msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
+    msg += `🔥 <b>Market Status:</b> OVERHEATED\n`;
+    msg += `🛡️ <b>Protection:</b> Trade Blocked\n`;
+    msg += `📉 <i>Cooling required before next entry</i>`;
+    msg += divider();
+
+    await sendTelegram(msg);
+
+    saveState();
+    return;
+}
+
+state.waitCount = 0;
+                    if(state.recoveryMode){
+    state.currentLevel = Math.max(1, Math.floor(FUND_LEVELS.length / 2));
+    state.recoveryMode = false;
+}
+
+let betAmount = FUND_LEVELS[state.currentLevel]; 
                     
-                    // 🎨 SMART UI UPDATE
-                    let msg = `⚙️ <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐐𝐔𝐀𝐍𝐓 : 𝐒𝐈𝐆𝐍𝐀𝐋</b> ⚙️\n`; 
-                    msg += `⟡ ════════ ⋆★⋆ ════════ ⟡\n`; 
+                    // 🏛️ V6.0 TERMINAL UI UPDATE
+                    let msg = `🏛️ <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐈𝐍𝐒𝐓𝐈𝐓𝐔𝐓𝐈𝐎𝐍𝐀𝐋 : 𝐄𝐗𝐄𝐂𝐔𝐓𝐄</b> 🏛️\n`; 
+                    msg += divider(); 
                     msg += `🎯 <b>𝐓𝐚𝐫𝐠𝐞𝐭 𝐏𝐞𝐫𝐢𝐨𝐝 :</b> <code>${targetIssue.slice(-4)}</code>\n`; 
-                    msg += `📊 <b>𝐌𝐞𝐭𝐫𝐢𝐜 :</b> 📏 SIZE ONLY\n`; 
-                    msg += `🔮 <b>𝐀𝐥𝐠𝐨 𝐏𝐫𝐞𝐝𝐢𝐜𝐭𝐢𝐨𝐧 : ${signal.action}</b>\n`; 
-                    msg += `✅ <b>𝐏𝐚𝐭𝐭𝐞𝐫𝐧 𝐌𝐚𝐭𝐜𝐡 :</b> 🟩🟩🟩🟩🟩 <b>100%</b>\n`; 
-                    msg += `⟡ ════════ ⋆★⋆ ════════ ⟡\n`; 
+                    msg += `📈 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐥𝐭𝐡 :</b> ${marketHealth}\n`;
+                    msg += `🔥 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐭 :</b> ${heat.bars} (${heat.label})\n`;
+                    msg += `📊 <b>𝐌𝐞𝐭𝐫𝐢𝐜 :</b> SIZE ONLY 📏\n`; 
+                    msg += `🛡️ <b>𝐑𝐞𝐠𝐢𝐦𝐞 :</b> ${signal.regime}\n`;
+                    msg += divider();
+                    msg += `🔮 <b>𝐐𝐮𝐚𝐧𝐭 𝐒𝐢𝐠𝐧𝐚𝐥 : ${signal.action}</b>\n`;
                     msg += `💎 <b>𝐄𝐧𝐭𝐫𝐲 𝐋𝐞𝐯𝐞𝐥 :</b> Level ${state.currentLevel + 1}\n`; 
                     msg += `💰 <b>𝐈𝐧𝐯𝐞𝐬𝐭𝐦𝐞𝐧𝐭 :</b> Rs. ${betAmount}\n`; 
-                    msg += `🧠 <b>𝐂𝐡𝐚𝐫𝐭 𝐋𝐨𝐠𝐢𝐜 :</b> <i>${signal.reason} Detected</i>`; 
-                    
+                    msg += `🧠 <b>𝐂𝐡𝐚𝐫𝐭 𝐋𝐨𝐠𝐢𝐜 :</b> <i>${signal.reason}</i>\n`;
+msg += `📊 <b>𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞 :</b> ${signal.confidence}%`; 
+                    msg += divider();
                     await sendTelegram(msg); 
                     state.activePrediction = { period: targetIssue, pred: signal.action, type: "SIZE", conf: 100, timestamp: Date.now() }; 
                     saveState(); 
                 } 
             } 
-            state.lastProcessedIssue = latestIssue; saveState(); 
+            state.shockLockIssue = null;
+state.cooldownLockIssue = null;
+state.lastProcessedIssue = latestIssue;
+saveState();
         } 
     } catch (e) {
         console.log(`[API ERROR] ${e.message}`);
@@ -257,5 +622,5 @@ async function tick() {
     } 
 } 
 
-setInterval(tick, 2500); 
+setInterval(tick, 3000); 
 tick();
