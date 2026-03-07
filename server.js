@@ -20,7 +20,7 @@ app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ V6.0 Quant Algo listeni
 // ==========================================
 // ⚙️ CONFIGURATION
 // ==========================================
-const TELEGRAM_BOT_TOKEN = "7574355493:AAFJQ9VSE9kYvlur_kOoLPU6iAGrp6v9F9Y"; 
+const TELEGRAM_BOT_TOKEN = "7574355493:AAFQhLaikfUUlskqe2057iuKX4t2SR_1Fsc"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"];
 
 let lastUpdateId = 0;
@@ -80,26 +80,6 @@ async function sendTelegram(text) {
         } catch(e) {} 
     } 
 } 
-
-async function sendMenu(chat_id){
-
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
-        method:"POST",
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-            chat_id,
-            text:"🧠 <b>JARVIS CONTROL PANEL</b>\nChoose an option:",
-            parse_mode:"HTML",
-            reply_markup:{
-                keyboard:[
-                    ["📊 Stats","❤️ Health"],
-                    ["🧠 Patterns","⚙️ System"]
-                ],
-                resize_keyboard:true
-            }
-        })
-    });
-}
 
 async function sendStats(chat_id){
 
@@ -304,23 +284,6 @@ function shockTrap(list){
     return { trapped:false };
 }
 
-function liquidityTrap(list){
-
-    let sizes = list.slice(0,5).map(i => Number(i.number) <= 4 ? 'S' : 'B');
-
-    const pattern = sizes.join('');
-
-    if(pattern === "BBBBS"){
-        return { trapped:true, reason:"Liquidity Trap (BBBB→S)" };
-    }
-
-    if(pattern === "SSSSB"){
-        return { trapped:true, reason:"Liquidity Trap (SSSS→B)" };
-    }
-
-    return { trapped:false };
-}
-
 function getConfidence(patternLength, regime, gravityAligned){
 
     let score = 50;
@@ -393,11 +356,11 @@ function regimeShield(list){
     // -------- EXPANSION CHECK --------
     let expansion = false;
     if(
-    sizes.slice(0,5).join('') === 'BBBBB' ||
-    sizes.slice(0,5).join('') === 'SSSSS'
-){
-    expansion = true;
-}
+        sizes.slice(0,5).join('') === 'BBBBS' ||
+        sizes.slice(0,5).join('') === 'SSSSB'
+    ){
+        expansion = true;
+    }
 
     // -------- DECISION --------
     if(flips >= 6){
@@ -861,24 +824,6 @@ if(shock.trapped){
     return;
 }
 
-const trap = liquidityTrap(list);
-
-if(trap.trapped){
-
-    let msg = `🪤 <b>LIQUIDITY TRAP DETECTED</b>\n`;
-    msg += divider();
-    msg += `🎯 Period: <code>${targetIssue.slice(-4)}</code>\n`;
-    msg += `⚠️ Trade blocked\n`;
-    msg += `🧠 ${trap.reason}`;
-    msg += divider();
-
-    await sendTelegram(msg);
-
-    state.waitCount++;
-    saveState();
-    return;
-}
-
 if(signal.action !== "WAIT"){
 
     if(survivalReset(signal.regime, signal.confidence)){
@@ -1023,26 +968,13 @@ async function checkCommands(){
             const chat_id = update.message.chat.id;
             const text = update.message.text;
 
-            if(text === "/start"){
-                await sendMenu(chat_id);
-            }
+            if(text === "/stats"){
+    await sendStats(chat_id);
+}
 
-            if(text === "📊 Stats"){
-                await sendStats(chat_id);
-            }
-
-            if(text === "❤️ Health"){
-                await sendHealth(chat_id);
-            }
-
-            if(text === "🧠 Patterns"){
-                await sendStats(chat_id);
-            }
-
-            if(text === "⚙️ System"){
-                await sendHealth(chat_id);
-            }
-
+if(text === "/health"){
+    await sendHealth(chat_id);
+}
         }
 
     }catch(e){}
