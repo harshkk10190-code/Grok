@@ -468,20 +468,15 @@ function evolvePattern(pattern, confidence){
 
     const winrate = stats.wins / total;
 
-    // 🔥 Strong Pattern Boost
     if(winrate >= 0.65){
         confidence += 12;
     }
-
-    // ⚠️ Weak Pattern
     else if(winrate < 0.50){
         confidence -= 15;
     }
 
-    // ☠️ Dangerous Pattern
     if(winrate < 0.35){
 
-        // Prevent repeated cooldown spam
         if(stats.cooldown === 0){
 
             stats.cooldown = 30;
@@ -505,6 +500,30 @@ System cooling this pattern.`
     return confidence;
 }
 
+// 🔥 ADD THIS RIGHT HERE
+function patternBooster(patternName, confidence){
+
+    const stats = state.patternStats[patternName];
+
+    if(!stats) return confidence;
+
+    const total = stats.wins + stats.losses;
+
+    if(total < 10) return confidence;
+
+    const winrate = stats.wins / total;
+
+    if(winrate >= 0.70){
+        confidence += 10;
+    }
+
+    if(winrate >= 0.80){
+        confidence += 20;
+    }
+
+    return confidence;
+}
+
 // ==========================================
 // 📈 SMART 11-PATTERN ALGORITHM (V6.0 DEEP SCAN)
 // ==========================================
@@ -512,6 +531,14 @@ System cooling this pattern.`
 function analyzeTrendsV7(list){
 
 if(state.lossStreak >= 3){
+
+    state.waitCount++;
+
+    if(state.waitCount >= 25){
+        state.lossStreak = 0;
+        state.waitCount = 0;
+    }
+
     return {
         action:"WAIT",
         regime:"PROTECTION",
@@ -536,7 +563,7 @@ if(state.lossStreak >= 3){
     let forward = sizes.join('');
     let reverse = sizes.slice().reverse().join('');
 
-    const match = (p)=> forward.endsWith(p);
+    const match = (p)=> forward.endsWith(p) || reverse.endsWith(p);
 
     let small=0,big=0;
     for(let i=0;i<5;i++){
@@ -601,6 +628,27 @@ if(stats && stats.cooldown > 0){
     };
 }
 
+// 🧠 Weak Pattern Filter
+if(stats){
+
+    const total = stats.wins + stats.losses;
+
+    if(total >= 6){
+
+        const winrate = stats.wins / total;
+
+        if(winrate < 0.45){
+
+            return {
+                action:"WAIT",
+                regime:"PATTERN_BLOCKED",
+                confidence:0,
+                reason:`Weak Pattern ${patternName}`
+            };
+        }
+    }
+}
+
     let gravityAligned =
         (gravity === 'S' && decision === 'SMALL') ||
         (gravity === 'B' && decision === 'BIG');
@@ -626,16 +674,43 @@ else{
 let last = sizes[0];
 let prev = sizes[1];
 
-if(decision === "BIG" && last !== 'B' && prev !== 'B'){
-    confidence -= 15;
+// Momentum Confirmation Filter
+if(decision === "BIG"){
+
+    if(last !== 'B' && prev !== 'B'){
+        return {
+            action:"WAIT",
+            regime:"MOMENTUM_FAIL",
+            confidence:0,
+            reason:"Big Momentum Not Confirmed"
+        };
+    }
+
 }
 
-if(decision === "SMALL" && last !== 'S' && prev !== 'S'){
-    confidence -= 15;
+if(decision === "SMALL"){
+
+    if(last !== 'S' && prev !== 'S'){
+        return {
+            action:"WAIT",
+            regime:"MOMENTUM_FAIL",
+            confidence:0,
+            reason:"Small Momentum Not Confirmed"
+        };
+    }
+
 }
 
 confidence = evolvePattern(patternName, confidence);
-confidence = Math.max(40, confidence);
+confidence = patternBooster(patternName, confidence);
+if(confidence < 55){
+    return {
+        action:"WAIT",
+        regime:"LOW_CONFIDENCE",
+        confidence,
+        reason:"Weak Signal Filter"
+    };
+}
 
     return {
         action: decision,
@@ -693,14 +768,16 @@ async function tick() {
                     let isWin = (actualResult === state.activePrediction.pred); 
                     recordPattern(state.activePrediction.pattern, isWin);
                     
-                    if(isWin) {
+                    state.totalSignals++;
+
+if(isWin){
     state.wins++;
-    state.totalSignals++;
     state.currentLevel = 0;
     state.lossStreak = 0;
-} else { 
-    state.currentLevel++; 
+}else{
+    state.currentLevel++;
     state.lossStreak++;
+}
 
     if(state.currentLevel >= FUND_LEVELS.length - 1){
 
@@ -714,7 +791,7 @@ async function tick() {
         }
     }
 
-    state.totalSignals++;
+    
     state.currentLevel = Math.floor(FUND_LEVELS.length / 2);
     state.recoveryMode = true;
     state.wasOverheated = true;
@@ -985,6 +1062,6 @@ if(text === "/health"){
 // ⚙️ SYSTEM LOOPS
 // ==========================================
 
-setInterval(checkCommands,5000);   // listen for /stats
+setInterval(checkCommands,3000);   // listen for /stats
 setInterval(tick,3000);            // main trading engine
 tick();
