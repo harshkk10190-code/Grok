@@ -1,6 +1,5 @@
 const express = require('express');
 const fs = require('fs');
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -764,76 +763,78 @@ async function tick() {
             if(BigInt(latestIssue) >= BigInt(state.activePrediction.period)) { 
                 const resultItem = list.find(i => i.issueNumber === state.activePrediction.period); 
                 if(resultItem) { 
-                    let actualNum = Number(resultItem.number); 
-                    let actualResult = getSize(actualNum); 
-                    let isWin = (actualResult === state.activePrediction.pred); 
-                    recordPattern(state.activePrediction.pattern, isWin);
-                    
-                    state.totalSignals++;
+    let actualNum = Number(resultItem.number); 
+    let actualResult = getSize(actualNum); 
+    let isWin = (actualResult === state.activePrediction.pred); 
 
-if(isWin){
-    state.wins++;
-    state.currentLevel = 0;
-    state.lossStreak = 0;
-}else{
-    state.currentLevel++;
-    state.lossStreak++;
-}
+    recordPattern(state.activePrediction.pattern, isWin);
+                    
+    state.totalSignals++;
+
+    if(isWin){
+        state.wins++;
+        state.currentLevel = 0;
+        state.lossStreak = 0;
+    }else{
+        state.currentLevel++;
+        state.lossStreak++;
+    }
 
     if(state.currentLevel >= FUND_LEVELS.length - 1){
 
-    // 🧠 Record Ladder Crash Pattern
-    if(state.activePrediction && state.activePrediction.pattern){
+        if(state.activePrediction && state.activePrediction.pattern){
 
-        const p = state.activePrediction.pattern;
+            const p = state.activePrediction.pattern;
 
-        if(state.patternStats[p]){
-            state.patternStats[p].ladderFails++;
+            if(state.patternStats[p]){
+                state.patternStats[p].ladderFails++;
+            }
         }
-    }
 
-    
-    state.currentLevel = Math.floor(FUND_LEVELS.length / 2);
-    state.recoveryMode = true;
-    state.wasOverheated = true;
-    state.cooldownCycles = 0;
+        state.currentLevel = Math.floor(FUND_LEVELS.length / 2);
+        state.recoveryMode = true;
+        state.wasOverheated = true;
+        state.cooldownCycles = 0;
 
-    await sendTelegram(`🛡️ <b>RECOVERY MODE ACTIVATED</b>
+        await sendTelegram(`🛡️ <b>RECOVERY MODE ACTIVATED</b>
 Post-loss survival engaged.
 Cooling before next entry.`);
-}
+    }
 
-}  // ✅ THIS WAS MISSING
+    let currentAccuracy = state.totalSignals > 0 
+        ? Math.round((state.wins / state.totalSignals) * 100) 
+        : 100; 
+
+    let marketHealth = getMarketHealth();
+    const heat = getHeatMeter();
                     
-                    let currentAccuracy = state.totalSignals > 0 ? Math.round((state.wins / state.totalSignals) * 100) : 100; 
-                    let marketHealth = getMarketHealth();
-                    const heat = getHeatMeter();
+    let resMsg = isWin 
+        ? `✅ <b>𝐏𝐑𝐎𝐅𝐈𝐓 𝐒𝐄𝐂𝐔𝐑𝐄𝐃</b> ✅\n` 
+        : `🛑 <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> 🛑\n`; 
+
+    resMsg += divider(); 
+    resMsg += `🎯 <b>𝐏𝐞𝐫𝐢𝐨𝐝 :</b> <code>${state.activePrediction.period.slice(-4)}</code>\n`; 
+    resMsg += `🎲 <b>𝐑𝐞𝐬𝐮𝐥𝐭 :</b> ${actualNum} (${actualResult})\n`; 
+    resMsg += `📈 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐥𝐭𝐡 :</b> ${marketHealth}\n`;
+    resMsg += `🔥 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐭 :</b> ${heat.bars} (${heat.label})\n`;
                     
-                    // 🏛️ V6.0 TERMINAL UI UPDATE
-                    let resMsg = isWin ? `✅ <b>𝐏𝐑𝐎𝐅𝐈𝐓 𝐒𝐄𝐂𝐔𝐑𝐄𝐃</b> ✅\n` : `🛑 <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> 🛑\n`; 
-                    resMsg += divider(); 
-                    resMsg += `🎯 <b>𝐏𝐞𝐫𝐢𝐨𝐝 :</b> <code>${state.activePrediction.period.slice(-4)}</code>\n`; 
-                    resMsg += `🎲 <b>𝐑𝐞𝐬𝐮𝐥𝐭 :</b> ${actualNum} (${actualResult})\n`; 
-                    resMsg += `📈 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐥𝐭𝐡 :</b> ${marketHealth}\n`;
-                    resMsg += `🔥 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐭 :</b> ${heat.bars} (${heat.label})\n`;
+    if(!isWin) {
+        resMsg += `🛡️ <b>𝐒𝐭𝐚𝐭𝐮𝐬 :</b> 𝐄𝐒𝐂𝐀𝐋𝐀𝐓𝐈𝐍𝐆 (𝐋𝐞𝐯𝐞𝐥 ${state.currentLevel + 1})\n`; 
+    }
+
+    resMsg += `🏆 <b>𝐖𝐢𝐧 𝐑𝐚𝐭𝐞 :</b> ${currentAccuracy}%\n`;
+    resMsg += divider(); 
                     
-                    if(!isWin) {
-                        resMsg += `🛡️ <b>𝐒𝐭𝐚𝐭𝐮𝐬 :</b> 𝐄𝐒𝐂𝐀𝐋𝐀𝐓𝐈𝐍𝐆 (𝐋𝐞𝐯𝐞𝐥 ${state.currentLevel + 1})\n`; 
-                    }
-                    resMsg += `🏆 <b>𝐖𝐢𝐧 𝐑𝐚𝐭𝐞 :</b> ${currentAccuracy}%\n`;
-                    resMsg += divider(); 
-                    
-                    await sendTelegram(resMsg);
+    await sendTelegram(resMsg);
 
-// 🧠 Pattern Intelligence Check
-const killer = detectKillerPattern();
+    const killer = detectKillerPattern();
 
-if(killer && state.lastKiller !== killer){
+    if(killer && state.lastKiller !== killer){
 
-    state.lastKiller = killer;
-    saveState();
+        state.lastKiller = killer;
+        saveState();
 
-    await sendTelegram(
+        await sendTelegram(
 `🧠 <b>PATTERN ANALYSIS</b>
 
 ⚠️ Weak Pattern Detected
@@ -842,9 +843,10 @@ ${killer}
 
 Winrate below system average.
 Consider disabling this pattern.`
-);
-} 
-                } 
+        );
+    }
+
+}   // ✅ CLOSE if(resultItem) HERE
                 state.activePrediction = null; saveState(); 
             } 
         } 
