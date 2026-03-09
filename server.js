@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -162,7 +163,7 @@ async function sendHealth(chat_id){
 }
 
 function divider(){
-    return `<pre>⟡ ════════ ⋆★⋆ ════════ ⟡</pre>\n`;
+    return `<pre>⟡ ═══════════ ⋆★⋆ ═══════════ ⟡</pre>\n`;
 }
 
 if (!state.isStarted) { 
@@ -1062,6 +1063,6 @@ if(text === "/health"){
 // ⚙️ SYSTEM LOOPS
 // ==========================================
 
-setInterval(checkCommands,3000);   // listen for /stats
+setInterval(checkCommands,5000);   // listen for /stats
 setInterval(tick,3000);            // main trading engine
 tick();
