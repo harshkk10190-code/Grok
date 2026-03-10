@@ -57,7 +57,8 @@ recoveryMode: false,
 shockLockIssue: null,
 cooldownLockIssue: null,
 patternStats: {},
-lastKiller: null
+lastKiller: null,
+patternRevenge: null
 };
 
 function loadState() { 
@@ -279,6 +280,23 @@ function shockTrap(list){
     // Overheated market reversal spike
     if(heat.label === "Overheated" && sizes[0] !== sizes[1]){
         return { trapped:true, reason:"Heat Reversal Trap" };
+    }
+
+    return { trapped:false };
+}
+
+function liquidityTrap(list){
+
+    let sizes = list.slice(0,6).map(i => Number(i.number) <= 4 ? 'S' : 'B');
+
+    const pattern = sizes.join('');
+
+    if(pattern === "BBBBS"){
+        return { trapped:true, reason:"Liquidity Trap (BBBB→S)" };
+    }
+
+    if(pattern === "SSSSB"){
+        return { trapped:true, reason:"Liquidity Trap (SSSS→B)" };
     }
 
     return { trapped:false };
@@ -524,6 +542,23 @@ function patternBooster(patternName, confidence){
     return confidence;
 }
 
+function marketMakerTrap(list){
+
+    let sizes = list.slice(0,7).map(i => Number(i.number) <= 4 ? 'S' : 'B');
+
+    let flips = 0;
+
+    for(let i=0;i<6;i++){
+        if(sizes[i] !== sizes[i+1]) flips++;
+    }
+
+    if(flips >= 6){
+        return { trapped:true, reason:"Market Maker Flip Storm" };
+    }
+
+    return { trapped:false };
+}
+
 // ==========================================
 // 📈 SMART 11-PATTERN ALGORITHM (V6.0 DEEP SCAN)
 // ==========================================
@@ -617,6 +652,17 @@ else if(match('SBSB')){
     };
 }
 
+// 🧠 PATTERN REVENGE BLOCK
+if(state.patternRevenge === patternName){
+
+    return {
+        action:"WAIT",
+        regime:"REVENGE_BLOCK",
+        confidence:0,
+        reason:`Pattern Revenge Block (${patternName})`
+    };
+}
+
 const stats = state.patternStats[patternName];
 
 if(stats && stats.cooldown > 0){
@@ -677,7 +723,7 @@ let prev = sizes[1];
 // Momentum Confirmation Filter
 if(decision === "BIG"){
 
-    if(last !== 'B' && prev !== 'B'){
+    if(last !== 'B' || prev !== 'B'){
         return {
             action:"WAIT",
             regime:"MOMENTUM_FAIL",
@@ -690,7 +736,7 @@ if(decision === "BIG"){
 
 if(decision === "SMALL"){
 
-    if(last !== 'S' && prev !== 'S'){
+     if(last !== 'S' || prev !== 'S'){
         return {
             action:"WAIT",
             regime:"MOMENTUM_FAIL",
@@ -772,13 +818,17 @@ async function tick() {
     state.totalSignals++;
 
     if(isWin){
-        state.wins++;
-        state.currentLevel = 0;
-        state.lossStreak = 0;
-    }else{
-        state.currentLevel++;
-        state.lossStreak++;
-    }
+    state.wins++;
+    state.currentLevel = 0;
+    state.lossStreak = 0;
+
+    state.patternRevenge = null;
+}else{
+    state.currentLevel++;
+    state.lossStreak++;
+
+    state.patternRevenge = state.activePrediction.pattern;
+}
 
     if(state.currentLevel >= FUND_LEVELS.length - 1){
 
@@ -898,6 +948,42 @@ if(shock.trapped){
 
         await sendTelegram(msg);
     }
+
+    state.waitCount++;
+    saveState();
+    return;
+}
+
+const liq = liquidityTrap(list);
+
+if(liq.trapped){
+
+    let msg = `💧 <b>LIQUIDITY TRAP DETECTED</b>\n`;
+    msg += divider();
+    msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
+    msg += `🛑 <b>Institutional Reversal Blocked</b>\n`;
+    msg += `🧠 <i>${liq.reason}</i>`;
+    msg += divider();
+
+    await sendTelegram(msg);
+
+    state.waitCount++;
+    saveState();
+    return;
+}
+
+const mm = marketMakerTrap(list);
+
+if(mm.trapped){
+
+    let msg = `🏦 <b>MARKET MAKER DETECTED</b>\n`;
+    msg += divider();
+    msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
+    msg += `🛑 <b>Algorithmic Manipulation</b>\n`;
+    msg += `🧠 <i>${mm.reason}</i>`;
+    msg += divider();
+
+    await sendTelegram(msg);
 
     state.waitCount++;
     saveState();
