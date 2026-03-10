@@ -20,7 +20,7 @@ app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ V6.0 Quant Algo listeni
 // ==========================================
 // ⚙️ CONFIGURATION
 // ==========================================
-const TELEGRAM_BOT_TOKEN = "7574355493:AAG6T_e7v85ePyDMRm6K6d7OcqntUK-mLIw"; 
+const TELEGRAM_BOT_TOKEN = "7574355493:AAE46Z7VRQMOHQPPioog48AXRHHeEz3hfcY"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"];
 
 let lastUpdateId = 0;
@@ -234,13 +234,13 @@ function dividerOnline(){
 }
 
 function dividerVersion(){
-    return `<pre>⟡ ══════════════ 🚀 𝐕𝟗.𝟎 ══════════════ ⟡</pre>\n`;
+    return `<pre>⟡ ════════════ 🚀 𝐕𝟗.𝟎 ════════════ ⟡</pre>\n`;
 }
 
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `⚙️ <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐂𝐎𝐑𝐄 : 𝐈𝐍𝐈𝐓𝐈𝐀𝐋𝐈𝐙𝐈𝐍𝐆</b> ⚙️\n⟡ ════════ 🤖 𝐉𝐀𝐑𝐕𝐈𝐒 𝐎𝐍𝐋𝐈𝐍𝐄 ════════ ⟡\n\n🛡️ <i>Market Health Monitor Active.</i>\n📏 <i>Size-Only Quantitative Logic Loaded.</i>\n📈 <i>11/11 Master Trends Calibrated.</i>\n\n⟡ ══════════════🚀 𝐕𝟗.𝟎 ══════════════ ⟡`; 
+    let bootMsg = `⚙️ <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐂𝐎𝐑𝐄 : 𝐈𝐍𝐈𝐓𝐈𝐀𝐋𝐈𝐙𝐈𝐍𝐆</b> ⚙️\n⟡ ═══════ 🤖 𝐉𝐀𝐑𝐕𝐈𝐒 𝐎𝐍𝐋𝐈𝐍𝐄 ═══════ ⟡\n\n🛡️ <i>Market Health Monitor Active.</i>\n📏 <i>Size-Only Quantitative Logic Loaded.</i>\n📈 <i>11/11 Master Trends Calibrated.</i>\n\n⟡ ════════════🚀 𝐕𝟗.𝟎 ════════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
