@@ -20,7 +20,7 @@ app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ V6.0 Quant Algo listeni
 // ==========================================
 // ⚙️ CONFIGURATION
 // ==========================================
-const TELEGRAM_BOT_TOKEN = "7574355493:AAFQhLaikfUUlskqe2057iuKX4t2SR_1Fsc"; 
+const TELEGRAM_BOT_TOKEN = "7574355493:AAHrIHNO4oVEZiBr117pJ_U5INaNzVV1KVQ"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"];
 
 let lastUpdateId = 0;
