@@ -20,7 +20,7 @@ app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ V6.0 Quant Algo listeni
 // ==========================================
 // ⚙️ CONFIGURATION
 // ==========================================
-const TELEGRAM_BOT_TOKEN = "7574355493:AAGJ7tcCb-pAvWcYbXkPHbU7g65qjt_UFZ0"; 
+const TELEGRAM_BOT_TOKEN = "7574355493:AAG6T_e7v85ePyDMRm6K6d7OcqntUK-mLIw"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"];
 
 let lastUpdateId = 0;
@@ -59,7 +59,8 @@ cooldownLockIssue: null,
 patternStats: {},
 lastKiller: null,
 patternRevenge: null,
-marketMakerLockIssue: null
+marketMakerLockIssue: null,
+liquidityLockIssue: null
 };
 
 function loadState() { 
@@ -163,6 +164,67 @@ async function sendHealth(chat_id){
     });
 }
 
+async function sendPatterns(chat_id){
+
+    let msg = `🧠 <b>JARVIS PATTERN INTELLIGENCE</b>\n`;
+    msg += dividerVersion();
+
+    const patterns = state.patternStats;
+
+    if(Object.keys(patterns).length === 0){
+        msg += `No patterns recorded yet.\n`;
+    } else {
+
+        for(const p in patterns){
+
+            const s = patterns[p];
+            const total = s.wins + s.losses;
+            const winrate = total ? Math.round((s.wins/total)*100) : 0;
+
+            msg += `\n<b>${p}</b>\n`;
+            msg += `Winrate : ${winrate}%\n`;
+            msg += `Trades  : ${total}\n`;
+            msg += `Fails   : ${s.ladderFails}\n`;
+        }
+    }
+
+    msg += dividerOnline();
+
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+            chat_id,
+            text:msg,
+            parse_mode:"HTML"
+        })
+    });
+}
+
+async function sendSystem(chat_id){
+
+    let msg = `⚙️ <b>JARVIS SYSTEM CORE</b>\n`;
+    msg += dividerVersion();
+
+    msg += `Active Prediction : ${state.activePrediction ? "YES" : "NONE"}\n`;
+    msg += `Current Level     : ${state.currentLevel + 1}\n`;
+    msg += `Loss Streak       : ${state.lossStreak}\n`;
+    msg += `Skip Streak       : ${state.skipStreak}\n`;
+    msg += `Recovery Mode     : ${state.recoveryMode ? "ON" : "OFF"}\n`;
+
+    msg += dividerOnline();
+
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+            chat_id,
+            text:msg,
+            parse_mode:"HTML"
+        })
+    });
+}
+
 function dividerCore(){
     return `<pre>⟡ ════════ 💀 𝐉𝐀𝐑𝐕𝐈𝐒 𝐂𝐎𝐑𝐄 ════════ ⟡</pre>\n`;
 }
@@ -172,13 +234,13 @@ function dividerOnline(){
 }
 
 function dividerVersion(){
-    return `<pre>⟡ ═══════════ 🚀 𝐕𝟗.𝟎 ═══════════ ⟡</pre>\n`;
+    return `<pre>⟡ ══════════════ 🚀 𝐕𝟗.𝟎 ══════════════ ⟡</pre>\n`;
 }
 
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `⚙️ <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐂𝐎𝐑𝐄 : 𝐈𝐍𝐈𝐓𝐈𝐀𝐋𝐈𝐙𝐈𝐍𝐆</b> ⚙️\n⟡ ════════ 🤖 𝐉𝐀𝐑𝐕𝐈𝐒 𝐎𝐍𝐋𝐈𝐍𝐄 ════════ ⟡\n\n🛡️ <i>Market Health Monitor Active.</i>\n📏 <i>Size-Only Quantitative Logic Loaded.</i>\n📈 <i>11/11 Master Trends Calibrated.</i>\n\n⟡ ════════🚀 𝐕𝟗.𝟎 ════════ ⟡`; 
+    let bootMsg = `⚙️ <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐂𝐎𝐑𝐄 : 𝐈𝐍𝐈𝐓𝐈𝐀𝐋𝐈𝐙𝐈𝐍𝐆</b> ⚙️\n⟡ ════════ 🤖 𝐉𝐀𝐑𝐕𝐈𝐒 𝐎𝐍𝐋𝐈𝐍𝐄 ════════ ⟡\n\n🛡️ <i>Market Health Monitor Active.</i>\n📏 <i>Size-Only Quantitative Logic Loaded.</i>\n📈 <i>11/11 Master Trends Calibrated.</i>\n\n⟡ ══════════════🚀 𝐕𝟗.𝟎 ══════════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
@@ -967,14 +1029,19 @@ const liq = liquidityTrap(list);
 
 if(liq.trapped){
 
-    let msg = `💧 <b>𝐋𝐈𝐐𝐔𝐈𝐃𝐈𝐓𝐘 𝐓𝐑𝐀𝐏 𝐃𝐄𝐓𝐄𝐂𝐓𝐄𝐃</b>\n`;
-    msg += dividerVersion();
-    msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
-    msg += `♨️ <b>Institutional Reversal Blocked</b>\n`;
-    msg += `🧠 <i>${liq.reason}</i>`;
-    msg += dividerOnline();
+    if(state.liquidityLockIssue !== latestIssue){
 
-    await sendTelegram(msg);
+        state.liquidityLockIssue = latestIssue;
+
+        let msg = `💧 <b>𝐋𝐈𝐐𝐔𝐈𝐃𝐈𝐓𝐘 𝐓𝐑𝐀𝐏 𝐃𝐄𝐓𝐄𝐂𝐓𝐄𝐃</b>\n`;
+        msg += dividerVersion();
+        msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
+        msg += `♨️ <b>Institutional Reversal Blocked</b>\n`;
+        msg += `🧠 <i>${liq.reason}</i>`;
+        msg += dividerOnline();
+
+        await sendTelegram(msg);
+    }
 
     state.waitCount++;
     saveState();
@@ -1119,6 +1186,7 @@ msg += `📊 <b>𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞 :</b> ${signal.confiden
             state.shockLockIssue = null;
 state.cooldownLockIssue = null;
 state.marketMakerLockIssue = null;
+state.liquidityLockIssue = null;
 state.lastProcessedIssue = latestIssue;
 saveState();
         } 
@@ -1159,11 +1227,11 @@ if(text === "/health" || text === "❤️ Health"){
 }
 
 if(text === "🧠 Patterns"){
-    await sendStats(chat_id);
+    await sendPatterns(chat_id);
 }
 
 if(text === "⚙️ System"){
-    await sendHealth(chat_id);
+    await sendSystem(chat_id);
 }
         }
 
