@@ -20,7 +20,7 @@ app.listen(PORT, () => console.log(`🚀 JᴀʀᴠᎥຮ V6.0 Quant Algo listeni
 // ==========================================
 // ⚙️ CONFIGURATION
 // ==========================================
-const TELEGRAM_BOT_TOKEN = "7574355493:AAE46Z7VRQMOHQPPioog48AXRHHeEz3hfcY"; 
+const TELEGRAM_BOT_TOKEN = "7574355493:AAF4WccSKin3JIbp9HJHrfc-B4-9srB24lg"; 
 const TARGET_CHATS = ["1669843747", "-1002613316641"];
 
 let lastUpdateId = 0;
@@ -59,8 +59,7 @@ cooldownLockIssue: null,
 patternStats: {},
 lastKiller: null,
 patternRevenge: null,
-marketMakerLockIssue: null,
-liquidityLockIssue: null
+liqLock: null
 };
 
 function loadState() { 
@@ -87,7 +86,7 @@ async function sendTelegram(text) {
 async function sendStats(chat_id){
 
     let msg = `🧠 <b>JARVIS AI STATISTICS TERMINAL</b>\n`;
-    msg += dividerVersion();
+    msg += divider();
 
     const accuracy = state.totalSignals > 0
         ? Math.round((state.wins/state.totalSignals)*100)
@@ -120,7 +119,7 @@ async function sendStats(chat_id){
         }
     }
 
-    msg += dividerOnline();
+    msg += divider();
     msg += `⚙️ <i>Adaptive Learning Engine Active</i>`;
 
     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
@@ -140,7 +139,7 @@ async function sendHealth(chat_id){
     const market = getMarketHealth();
 
     let msg = `🧠 <b>JARVIS MARKET HEALTH TERMINAL</b>\n`;
-    msg += dividerVersion();
+    msg += divider();
 
     msg += `📊 <b>Market Status</b>\n`;
     msg += `Health : ${market}\n`;
@@ -151,7 +150,7 @@ async function sendHealth(chat_id){
     msg += `Wait Cycles      : ${state.waitCount}\n`;
     msg += `Cooldown Cycles  : ${state.cooldownCycles}\n`;
 
-    msg += dividerOnline();
+    msg += divider();
 
     await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
         method:'POST',
@@ -164,83 +163,14 @@ async function sendHealth(chat_id){
     });
 }
 
-async function sendPatterns(chat_id){
-
-    let msg = `🧠 <b>JARVIS PATTERN INTELLIGENCE</b>\n`;
-    msg += dividerVersion();
-
-    const patterns = state.patternStats;
-
-    if(Object.keys(patterns).length === 0){
-        msg += `No patterns recorded yet.\n`;
-    } else {
-
-        for(const p in patterns){
-
-            const s = patterns[p];
-            const total = s.wins + s.losses;
-            const winrate = total ? Math.round((s.wins/total)*100) : 0;
-
-            msg += `\n<b>${p}</b>\n`;
-            msg += `Winrate : ${winrate}%\n`;
-            msg += `Trades  : ${total}\n`;
-            msg += `Fails   : ${s.ladderFails}\n`;
-        }
-    }
-
-    msg += dividerOnline();
-
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-            chat_id,
-            text:msg,
-            parse_mode:"HTML"
-        })
-    });
-}
-
-async function sendSystem(chat_id){
-
-    let msg = `⚙️ <b>JARVIS SYSTEM CORE</b>\n`;
-    msg += dividerVersion();
-
-    msg += `Active Prediction : ${state.activePrediction ? "YES" : "NONE"}\n`;
-    msg += `Current Level     : ${state.currentLevel + 1}\n`;
-    msg += `Loss Streak       : ${state.lossStreak}\n`;
-    msg += `Skip Streak       : ${state.skipStreak}\n`;
-    msg += `Recovery Mode     : ${state.recoveryMode ? "ON" : "OFF"}\n`;
-
-    msg += dividerOnline();
-
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-            chat_id,
-            text:msg,
-            parse_mode:"HTML"
-        })
-    });
-}
-
-function dividerCore(){
-    return `<pre>⟡ ════════ 💀 𝐉𝐀𝐑𝐕𝐈𝐒 𝐂𝐎𝐑𝐄 ════════ ⟡</pre>\n`;
-}
-
-function dividerOnline(){
-    return `<pre>⟡ ════════ 🤖 𝐉𝐀𝐑𝐕𝐈𝐒 𝐎𝐍𝐋𝐈𝐍𝐄 ════════ ⟡</pre>\n`;
-}
-
-function dividerVersion(){
-    return `<pre>⟡ ════════════ 🚀 𝐕𝟗.𝟎 ════════════ ⟡</pre>\n`;
+function divider(){
+    return `<pre>⟡ ═══════════ ⋆★⋆ ═══════════ ⟡</pre>\n`;
 }
 
 if (!state.isStarted) { 
     state.isStarted = true; 
     saveState(); 
-    let bootMsg = `⚙️ <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐂𝐎𝐑𝐄 : 𝐈𝐍𝐈𝐓𝐈𝐀𝐋𝐈𝐙𝐈𝐍𝐆</b> ⚙️\n⟡ ═══════ 🤖 𝐉𝐀𝐑𝐕𝐈𝐒 𝐎𝐍𝐋𝐈𝐍𝐄 ═══════ ⟡\n\n🛡️ <i>Market Health Monitor Active.</i>\n📏 <i>Size-Only Quantitative Logic Loaded.</i>\n📈 <i>11/11 Master Trends Calibrated.</i>\n\n⟡ ════════════🚀 𝐕𝟗.𝟎 ════════════ ⟡`; 
+    let bootMsg = `🏛️ <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐕𝟔.𝟎 𝐈𝐍𝐒𝐓𝐈𝐓𝐔𝐓𝐈𝐎𝐍𝐀𝐋</b> 🏛️\n⟡ ════════ ⋆★⋆ ════════ ⟡\n\n🛡️ <i>Market Health Monitor Active.</i>\n📏 <i>Size-Only Quantitative Logic Loaded.</i>\n📈 <i>11/11 Master Trends Calibrated.</i>\n\n⟡ ════════ ⋆★⋆ ════════ ⟡`; 
     sendTelegram(bootMsg); 
 } 
 
@@ -254,6 +184,9 @@ function getMarketHealth() {
 }
 
 function getHeatMeter(){
+
+    // Prevent waitCount from growing infinitely
+    state.waitCount = Math.min(state.waitCount, 50);
 
     let heat = 0;
 
@@ -273,9 +206,6 @@ function getHeatMeter(){
     if(heat >= 4) label = "Overheated";
     else if(heat >= 2) label = "Trend Building";
 
-    // ==========================
-    // 🔥 HEAT MEMORY TRACKING
-    // ==========================
     if(label === "Overheated"){
         state.wasOverheated = true;
         state.cooldownCycles = 0;
@@ -327,13 +257,13 @@ function cooldownGate(){
 
 function shockTrap(list){
 
-    let sizes = list.slice(0,5).map(i => Number(i.number) <= 4 ? 'S' : 'B');
+    let sizes = list.slice(0,6).map(i => Number(i.number) <= 4 ? 'S' : 'B');
 
     let last = sizes[0];
     let prevStreak = 1;
 
-    for(let i=1;i<4;i++){
-    if(sizes[i] === sizes[i+1]) prevStreak++;
+    for(let i=1;i<5;i++){
+    if(sizes[i] === sizes[i-1]) prevStreak++;
     else break;
 }
 
@@ -344,7 +274,7 @@ function shockTrap(list){
     // Calm market but sudden spike
     if(heat.label === "Calm" && prevStreak >= 4){
         if(sizes[0] !== sizes[1]){
-            return { trapped:true, reason:"𝐒𝐔𝐃𝐃𝐄𝐍 𝐒𝐏𝐈𝐊𝐄 𝐀𝐅𝐓𝐄𝐑 𝐂𝐀𝐋𝐌" };
+            return { trapped:true, reason:"Sudden Spike After Calm" };
         }
     }
 
@@ -373,7 +303,7 @@ function liquidityTrap(list){
     return { trapped:false };
 }
 
-function getConfidence(patternLength, regime, gravityAligned){
+function getConfidence(patternName, patternLength, regime, gravityAligned){
 
     let score = 50;
 
@@ -393,7 +323,6 @@ function getConfidence(patternLength, regime, gravityAligned){
     // 🧠 SELF LEARNING PATTERN AI
     // ==========================
 
-    const patternName = `Pattern-${patternLength}`;
     const stats = state.patternStats[patternName];
 
     if(stats){
@@ -623,11 +552,55 @@ function marketMakerTrap(list){
         if(sizes[i] !== sizes[i+1]) flips++;
     }
 
-    if(flips >= 5){
+    if(flips >= 6){
         return { trapped:true, reason:"Market Maker Flip Storm" };
     }
 
     return { trapped:false };
+}
+
+function fakeTrendTrap(list){
+
+    let sizes = list.slice(0,6).map(i => Number(i.number) <= 4 ? 'S' : 'B');
+
+    let streak = 1;
+
+    for(let i=1;i<6;i++){
+    if(sizes[i] === sizes[0]) streak++;
+    else break;
+}
+
+    if(streak >= 5){
+        return {
+            trapped:true,
+            reason:`Fake Trend Trap (${sizes[0]} streak)`
+        };
+    }
+
+    return { trapped:false };
+}
+
+function flowPressure(list){
+
+    let sizes = list.slice(0,6).map(i => Number(i.number) <= 4 ? 'S' : 'B');
+
+    let small = 0;
+    let big = 0;
+
+    for(let s of sizes){
+        if(s === 'S') small++;
+        else big++;
+    }
+
+    if(small >= 4){
+        return "SELL_PRESSURE";
+    }
+
+    if(big >= 4){
+        return "BUY_PRESSURE";
+    }
+
+    return "NEUTRAL";
 }
 
 // ==========================================
@@ -664,7 +637,7 @@ if(state.lossStreak >= 3){
         };
     }
 
-    let sizes = list.slice(0, 10).map(i => Number(i.number) <= 4 ? 'S' : 'B');
+    let sizes = list.slice(0,10).map(i => Number(i.number) <= 4 ? 'S' : 'B');
 
     let forward = sizes.join('');
     let reverse = sizes.slice().reverse().join('');
@@ -672,7 +645,7 @@ if(state.lossStreak >= 3){
     const match = (p)=> forward.endsWith(p) || reverse.endsWith(p);
 
     let small=0,big=0;
-    for(let i=0;i<5;i++){
+    for(let i=1;i<6;i++){
         let n = Number(list[i].number);
         if(n<=4) small++; else big++;
     }
@@ -684,6 +657,24 @@ let length = 0;
 let patternName = null;
 
 if(match('SSSBB')){
+
+    // 🔥 Elite Pressure Check
+    let pressure = 0;
+
+    for(let i=5;i<9;i++){
+        if(sizes[i] === 'S') pressure++;
+    }
+
+    // If previous trend was not strong enough → skip
+    if(pressure < 2){
+        return {
+            action:"WAIT",
+            regime:"WEAK_PATTERN",
+            confidence:0,
+            reason:"Weak SSSBB Pressure"
+        };
+    }
+
     decision='BIG';
     length=5;
     patternName="SSSBB";
@@ -767,8 +758,30 @@ if(stats){
 }
 
     let gravityAligned =
-        (gravity === 'S' && decision === 'SMALL') ||
-        (gravity === 'B' && decision === 'BIG');
+    (gravity === 'S' && decision === 'SMALL') ||
+    (gravity === 'B' && decision === 'BIG');
+
+// 🧠 Institutional Flow Detection
+const flow = flowPressure(list);
+
+// 🚫 Flow Conflict Protection
+if(decision === "BIG" && flow === "BUY_PRESSURE"){
+    return {
+        action:"WAIT",
+        regime:"FLOW_CONFLICT",
+        confidence:0,
+        reason:"Institutional Flow Against BIG"
+    };
+}
+
+if(decision === "SMALL" && flow === "SELL_PRESSURE"){
+    return {
+        action:"WAIT",
+        regime:"FLOW_CONFLICT",
+        confidence:0,
+        reason:"Institutional Flow Against SMALL"
+    };
+}
 
     let regimeType;
 
@@ -782,7 +795,7 @@ else{
     regimeType = "CHOP";
 }
 
-    let confidence = getConfidence(length, regimeType, gravityAligned);
+    let confidence = getConfidence(patternName, length, regimeType, gravityAligned);
 
 // ==========================
 // ⚡ MOMENTUM CONFIRMATION
@@ -794,7 +807,7 @@ let prev = sizes[1];
 // Momentum Confirmation Filter
 if(decision === "BIG"){
 
-    if(last !== 'B' || prev !== 'B'){
+    if(last !== 'B' && prev !== 'B'){
         return {
             action:"WAIT",
             regime:"MOMENTUM_FAIL",
@@ -807,7 +820,7 @@ if(decision === "BIG"){
 
 if(decision === "SMALL"){
 
-    if(last !== 'S' || prev !== 'S'){
+    if(last !== 'S' && prev !== 'S'){
         return {
             action:"WAIT",
             regime:"MOMENTUM_FAIL",
@@ -899,6 +912,11 @@ async function tick() {
     state.lossStreak++;
 
     state.patternRevenge = state.activePrediction.pattern;
+
+    // 🛡 Martingale protection
+    if(state.lossStreak >= 2){
+        state.waitCount += 3;
+    }
 }
 
     if(state.currentLevel >= FUND_LEVELS.length - 1){
@@ -930,10 +948,10 @@ Cooling before next entry.`);
     const heat = getHeatMeter();
                     
     let resMsg = isWin 
-        ? `✅ <b>     𝐏𝐑𝐎𝐅𝐈𝐓 𝐒𝐄𝐂𝐔𝐑𝐄𝐃     </b> ✅\n` 
-        : `❌ <b>     𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃    </b> ❌\n`; 
+        ? `✅ <b>𝐏𝐑𝐎𝐅𝐈𝐓 𝐒𝐄𝐂𝐔𝐑𝐄𝐃</b> ✅\n` 
+        : `🛑 <b>𝐓𝐀𝐑𝐆𝐄𝐓 𝐌𝐈𝐒𝐒𝐄𝐃</b> 🛑\n`; 
 
-    resMsg += dividerVersion(); 
+    resMsg += divider(); 
     resMsg += `🎯 <b>𝐏𝐞𝐫𝐢𝐨𝐝 :</b> <code>${state.activePrediction.period.slice(-4)}</code>\n`; 
     resMsg += `🎲 <b>𝐑𝐞𝐬𝐮𝐥𝐭 :</b> ${actualNum} (${actualResult})\n`; 
     resMsg += `📈 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐥𝐭𝐡 :</b> ${marketHealth}\n`;
@@ -944,7 +962,7 @@ Cooling before next entry.`);
     }
 
     resMsg += `🏆 <b>𝐖𝐢𝐧 𝐑𝐚𝐭𝐞 :</b> ${currentAccuracy}%\n`;
-    resMsg += dividerOnline(); 
+    resMsg += divider(); 
                     
     await sendTelegram(resMsg);
 
@@ -987,17 +1005,35 @@ if(coolBlock.blocked){
     if(state.cooldownLockIssue !== latestIssue){
         state.cooldownLockIssue = latestIssue;
 
-        let msg = `❄️ <b>𝐂𝐎𝐎𝐋𝐃𝐎𝐖𝐍 𝐌𝐎𝐃𝐄 𝐀𝐂𝐓𝐈𝐕𝐄 </b> ❄️\n`;
-        msg += dividerVersion();
+        let msg = `❄️ <b>COOLDOWN MODE ACTIVE</b> ❄️\n`;
+        msg += divider();
         msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
         msg += `🛡️ <b>Post-Heat Recovery</b>\n`;
         msg += `📉 <i>Waiting for stable flow before entry</i>`;
-        msg += dividerOnline();
+        msg += divider();
 
         await sendTelegram(msg);
     }
 
     state.waitCount++;
+    saveState();
+    return;
+}
+
+const fakeTrend = fakeTrendTrap(list);
+
+if(fakeTrend.trapped){
+
+    let msg = `🎭 <b>FAKE TREND DETECTED</b>\n`;
+    msg += divider();
+    msg += `🎯 Period: <code>${targetIssue.slice(-4)}</code>\n`;
+    msg += `🛑 <b>Trend Manipulation</b>\n`;
+    msg += `🧠 <i>${fakeTrend.reason}</i>`;
+    msg += divider();
+
+    await sendTelegram(msg);
+
+    state.waitCount += 2;
     saveState();
     return;
 }
@@ -1010,12 +1046,12 @@ if(shock.trapped){
     if(state.shockLockIssue !== latestIssue){
     state.shockLockIssue = latestIssue;
 
-        let msg = `⚡ <b>𝐒𝐇𝐎𝐂𝐊 𝐓𝐑𝐀𝐏 𝐃𝐄𝐓𝐄𝐂𝐓𝐄𝐃</b> ⚡\n`;
-        msg += dividerVersion();
+        let msg = `⚡ <b>SHOCK TRAP DETECTED</b> ⚡\n`;
+        msg += divider();
         msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
-        msg += `♨️ <b>Fake Breakout Blocked</b>\n`;
+        msg += `🛑 <b>Fake Breakout Blocked</b>\n`;
         msg += `🧠 <i>${shock.reason}</i>`;
-        msg += dividerOnline();
+        msg += divider();
 
         await sendTelegram(msg);
     }
@@ -1027,21 +1063,18 @@ if(shock.trapped){
 
 const liq = liquidityTrap(list);
 
-if(liq.trapped){
+if(liq.trapped && state.liqLock !== latestIssue){
 
-    if(state.liquidityLockIssue !== latestIssue){
+    state.liqLock = latestIssue;
 
-        state.liquidityLockIssue = latestIssue;
+    let msg = `💧 <b>LIQUIDITY TRAP DETECTED</b>\n`;
+    msg += divider();
+    msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
+    msg += `🛑 <b>Institutional Reversal Blocked</b>\n`;
+    msg += `🧠 <i>${liq.reason}</i>`;
+    msg += divider();
 
-        let msg = `💧 <b>𝐋𝐈𝐐𝐔𝐈𝐃𝐈𝐓𝐘 𝐓𝐑𝐀𝐏 𝐃𝐄𝐓𝐄𝐂𝐓𝐄𝐃</b>\n`;
-        msg += dividerVersion();
-        msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
-        msg += `♨️ <b>Institutional Reversal Blocked</b>\n`;
-        msg += `🧠 <i>${liq.reason}</i>`;
-        msg += dividerOnline();
-
-        await sendTelegram(msg);
-    }
+    await sendTelegram(msg);
 
     state.waitCount++;
     saveState();
@@ -1052,24 +1085,18 @@ const mm = marketMakerTrap(list);
 
 if(mm.trapped){
 
-    if(state.marketMakerLockIssue !== latestIssue){
+    let msg = `🏦 <b>MARKET MAKER DETECTED</b>\n`;
+    msg += divider();
+    msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
+    msg += `🛑 <b>Algorithmic Manipulation</b>\n`;
+    msg += `🧠 <i>${mm.reason}</i>`;
+    msg += divider();
 
-        state.marketMakerLockIssue = latestIssue;
+    await sendTelegram(msg);
 
-        let msg = `🏦 <b>𝐌𝐀𝐑𝐊𝐄𝐓 𝐌𝐀𝐊𝐄𝐑 𝐃𝐄𝐓𝐄𝐂𝐓𝐄𝐃</b>\n`;
-        msg += dividerVersion();
-        msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
-        msg += `⚠️ <b>𝐀𝐋𝐆𝐎𝐑𝐈𝐓𝐇𝐌𝐈𝐂 𝐌𝐀𝐍𝐈𝐏𝐔𝐋𝐀𝐓𝐈𝐎𝐍</b>\n`;
-        msg += `🧠 <i>${mm.reason}</i>`;
-        msg += dividerOnline();
-
-        await sendTelegram(msg);
-    }
-
-    state.waitCount += 2;
-state.cooldownCycles += 1;
-saveState();
-return;
+    state.waitCount++;
+    saveState();
+    return;
 }
 
 if(signal.action !== "WAIT"){
@@ -1101,14 +1128,14 @@ if(signal.action !== "WAIT"){
     if (state.waitCount === 1 || state.waitCount % 15 === 0) {
 
         let msg = `📡 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐌𝐀𝐑𝐊𝐄𝐓 𝐒𝐂𝐀𝐍</b> 📡\n`;
-        msg += dividerVersion();
+        msg += divider();
         msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
-        msg += `🎬 <b>𝐀𝐜𝐭𝐢𝐨𝐧:</b> SKIP\n`;
+        msg += `⚠️ <b>𝐀𝐜𝐭𝐢𝐨𝐧:</b> SKIP\n`;
         msg += `🛡️ <b>𝐑𝐞𝐠𝐢𝐦𝐞:</b> ${signal.regime}\n`;
         msg += `🔥 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐭 :</b> ${heat.bars} (${heat.label})\n`;
         msg += `🧠 <b>𝐑𝐞𝐚𝐬𝐨𝐧:</b> <i>${signal.reason}</i>\n`;
-        msg += `🤫 <i>(Silencing further scans to prevent spam)</i>`;
-        msg += dividerOnline();
+        msg += `🔇 <i>(Silencing further scans to prevent spam)</i>`;
+        msg += divider();
 
         await sendTelegram(msg);
     }
@@ -1134,13 +1161,13 @@ if(signal.action !== "WAIT"){
 
     state.waitCount++;
 
-    let msg = `📛 <b>𝐇𝐄𝐀𝐓 𝐋𝐎𝐂𝐊 𝐀𝐂𝐓𝐈𝐕𝐄</b> 📛\n`;
-    msg += dividerVersion();
+    let msg = `🛑 <b>𝐇𝐄𝐀𝐓 𝐋𝐎𝐂𝐊 𝐀𝐂𝐓𝐈𝐕𝐄</b> 🛑\n`;
+    msg += divider();
     msg += `🎯 𝐏𝐞𝐫𝐢𝐨𝐝: <code>${targetIssue.slice(-4)}</code>\n`;
     msg += `🔥 <b>Market Status:</b> OVERHEATED\n`;
     msg += `🛡️ <b>Protection:</b> Trade Blocked\n`;
     msg += `📉 <i>Cooling required before next entry</i>`;
-    msg += dividerOnline();
+    msg += divider();
 
     await sendTelegram(msg);
 
@@ -1157,20 +1184,20 @@ state.waitCount = 0;
 let betAmount = FUND_LEVELS[state.currentLevel]; 
                     
                     // 🏛️ V6.0 TERMINAL UI UPDATE
-                    let msg = `👾 <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐒𝐈𝐆𝐍𝐀𝐋 : 𝐃𝐄𝐓𝐄𝐂𝐓𝐄𝐃</b> 👾\n`; 
-                    msg += dividerOnline(); 
+                    let msg = `🏛️ <b>𝐉𝐀𝐑𝐕𝐈𝐒 𝐈𝐍𝐒𝐓𝐈𝐓𝐔𝐓𝐈𝐎𝐍𝐀𝐋 : 𝐄𝐗𝐄𝐂𝐔𝐓𝐄</b> 🏛️\n`; 
+                    msg += divider(); 
                     msg += `🎯 <b>𝐓𝐚𝐫𝐠𝐞𝐭 𝐏𝐞𝐫𝐢𝐨𝐝 :</b> <code>${targetIssue.slice(-4)}</code>\n`; 
                     msg += `📈 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐥𝐭𝐡 :</b> ${marketHealth}\n`;
                     msg += `🔥 <b>𝐌𝐚𝐫𝐤𝐞𝐭 𝐇𝐞𝐚𝐭 :</b> ${heat.bars} (${heat.label})\n`;
                     msg += `📊 <b>𝐌𝐞𝐭𝐫𝐢𝐜 :</b> SIZE ONLY 📏\n`; 
                     msg += `🛡️ <b>𝐑𝐞𝐠𝐢𝐦𝐞 :</b> ${signal.regime}\n`;
-                    msg += dividerVersion();
+                    msg += divider();
                     msg += `🔮 <b>𝐐𝐮𝐚𝐧𝐭 𝐒𝐢𝐠𝐧𝐚𝐥 : ${signal.action}</b>\n`;
                     msg += `💎 <b>𝐄𝐧𝐭𝐫𝐲 𝐋𝐞𝐯𝐞𝐥 :</b> Level ${state.currentLevel + 1}\n`; 
                     msg += `💰 <b>𝐈𝐧𝐯𝐞𝐬𝐭𝐦𝐞𝐧𝐭 :</b> Rs. ${betAmount}\n`; 
                     msg += `🧠 <b>𝐂𝐡𝐚𝐫𝐭 𝐋𝐨𝐠𝐢𝐜 :</b> <i>${signal.reason}</i>\n`;
 msg += `📊 <b>𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞 :</b> ${signal.confidence}%`; 
-                    msg += dividerCore();
+                    msg += divider();
                     await sendTelegram(msg); 
                     state.activePrediction = {
     period: targetIssue,
@@ -1185,8 +1212,6 @@ msg += `📊 <b>𝐂𝐨𝐧𝐟𝐢𝐝𝐞𝐧𝐜𝐞 :</b> ${signal.confiden
             } 
             state.shockLockIssue = null;
 state.cooldownLockIssue = null;
-state.marketMakerLockIssue = null;
-state.liquidityLockIssue = null;
 state.lastProcessedIssue = latestIssue;
 saveState();
         } 
@@ -1218,20 +1243,12 @@ async function checkCommands(){
             const chat_id = update.message.chat.id;
             const text = update.message.text;
 
-            if(text === "/stats" || text === "📊 Stats"){
+            if(text === "/stats"){
     await sendStats(chat_id);
 }
 
-if(text === "/health" || text === "❤️ Health"){
+if(text === "/health"){
     await sendHealth(chat_id);
-}
-
-if(text === "🧠 Patterns"){
-    await sendPatterns(chat_id);
-}
-
-if(text === "⚙️ System"){
-    await sendSystem(chat_id);
 }
         }
 
